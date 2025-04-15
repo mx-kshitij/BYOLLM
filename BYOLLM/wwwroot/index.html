@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Window</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <style>
+        /* @tailwind base;
+        @tailwind components;
+        @tailwind utilities;
+
+        @layer components {
+            .message-user {
+                @apply bg-blue-100 text-blue-800 self-end;
+            }
+
+            .message-bot {
+                @apply bg-gray-100 text-gray-800 self-start;
+            }
+        } */
+
+        #config-panel {
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.2s ease;
+            max-height: 0;
+        }
+
+            #config-panel.expanded {
+                max-height: 200px;
+            }
+
+        #config-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        #config-container {
+            position: absolute;
+            width: 100%;
+            z-index: 1;
+        }
+
+        #messages-container-outer{
+            height: calc(100vh - 127px);
+        }
+
+        #messages {
+            display: flex;
+            flex-direction: column-reverse; 
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-white dark:bg-gray-700">
+        <div class="flex justify-between">
+            <h2 class="p-3 text-xl font-bold dark:text-white">Studio AI Dev</h2>
+            <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                🌓
+            </button>
+        </div>
+
+        <div id="config-container" class="bg-white border-b dark:border-gray-700 dark:bg-gray-700">
+            <div class="p-3 flex justify-between items-center cursor-pointer" id="config-toggle">
+                <h3 class="font-medium dark:text-white">Configuration</h3>
+                <span id="config-arrow" class="transform transition-transform duration-200">▼</span>
+            </div>
+
+            <div id="config-panel" class="px-4 pb-4">
+                <div class="space-y-2">
+                    <input type="text" id="model-url" placeholder="Open AI URL" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <input type="text" id="api-key" placeholder="API Key" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <input type="text" id="model-name" placeholder="Model" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <button id="connect-btn" class="w-full p-2 bg-black text-white rounded hover:bg-gray-800">
+                        Connect
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="messages-container-outer">
+            <div id="messages" class="p-4 h-full overflow-y-auto flex flex-col space-y-2">
+                <!-- Messages will appear here -->
+            </div>
+        </div>
+        <div class="p-4 align-end border-t dark:border-gray-700 flex space-x-2">
+            <input type="text" id="message-input" placeholder="Type a message"
+                   class="flex-grow p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+            <button id="send-btn"
+                    class="bg-black text-white p-2 rounded hover:bg-gray-800">
+                Send
+            </button>
+        </div>
+    </div>
+
+    <script src="./main.js"></script>
+</body>
+</html>
