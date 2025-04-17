@@ -52,8 +52,16 @@ namespace BYOLLM
                 if (args.Message == "SendNewUserMessage")
                 {
                     var requestBody = args.Data.ToJsonString();
-                    string userMessage = new MessageHandler().HandleNewUserMessage(requestBody);
-                    conversationHistory.Add(new UserChatMessage(userMessage));
+                    MessageModel userMessage = new MessageHandler().HandleNewUserMessage(requestBody);
+                    if(userMessage.Attachment == null)
+                    {
+                        conversationHistory.Add(new UserChatMessage(userMessage.Text));
+                    }
+                    else
+                    {
+                        conversationHistory.Add(new UserChatMessage(userMessage.Text + "attachment: " +userMessage.Attachment));
+                    }
+
                     chatCompletion = chatClient.CompleteChat(conversationHistory);
                     conversationHistory.Add(new AssistantChatMessage(chatCompletion.Content[0].Text));
                     webView.PostMessage("AssistantMessageResponse", chatCompletion.Content[0].Text);

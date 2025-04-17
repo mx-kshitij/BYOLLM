@@ -41,9 +41,12 @@
             height: calc(100vh - 151px);
         }
 
+        #messages-container-outer.imgpreview {
+            height: calc(100vh - 205px);
+        }
+
         #messages {
             display: flex;
-            /*            flex-direction: column-reverse;*/
         }
 
         .validation-message {
@@ -91,18 +94,40 @@
                 <!-- Messages will appear here -->
             </div>
         </div>
-        <div class="p-4 border-t dark:border-gray-700 flex flex-col">
+        <div class="p-2 border-t dark:border-gray-700 flex flex-col">
             <div id="thinking-indicator" class="text-xs text-gray-500 dark:text-gray-400 mb-2 hidden">
                 Thinking...
             </div>
+            <div id="image-preview-container" class="mb-2 hidden">
+                <div class="relative inline-block">
+                    <img id="image-preview" class="h-16 w-auto rounded border dark:border-gray-600" src="" alt="Attachment preview">
+                    <button id="remove-image" class="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">×</button>
+                </div>
+            </div>
+
             <div class="flex space-x-2">
                 <input type="text" id="message-input" placeholder="Type a message"
                        class="flex-grow p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <button id="attach-image" class="bg-gray-200 text-gray-700 p-2 rounded hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="42"
+                         viewBox="0 0 40 42" fill="none" stroke="currentColor"
+                         stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 9a3 3 0 0 1 3-3h18" />
+                        <path d="M5 9v24a3 3 0 0 0 3 3h28a3 3 0 0 0 3-3V17" />
+                        <path d="M6 31l7-9 7 7 7-10 6 8" />
+                        <circle cx="12" cy="15" r="1.5" />
+                        <line x1="33" y1="6" x2="33" y2="10" stroke-width="1" />
+                        <line x1="31" y1="8" x2="35" y2="8" stroke-width="1" />
+                    </svg>
+
+                </button>
+                <input type="file" id="image-upload" accept="image/*" class="hidden">
                 <button id="send-btn"
                         class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex items-center justify-center min-w-[60px]" disabled>
                     Send
                 </button>
             </div>
+            <div id="image-error" class="text-red-500 text-xs mt-1 hidden"></div>
         </div>
     </div>
 

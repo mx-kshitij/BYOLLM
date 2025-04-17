@@ -1,5 +1,5 @@
-﻿// Message Sending
-async function addMessage(messagesContainer, text, type = 'user') {
+﻿function addMessage(text, type = 'user', attachment = null) {
+    const messagesContainer = document.getElementById('messages');
     const messageElement = document.createElement('div');
     messageElement.classList.add(
         'p-2', 'rounded', 'max-w-[80%]', 'border',
@@ -7,12 +7,27 @@ async function addMessage(messagesContainer, text, type = 'user') {
         type === 'user' ? 'border-black' : 'border-gray-400',
         type === 'user' ? 'self-end' : 'self-start'
     );
-    messageElement.textContent = text;
+
+    if (text) {
+        const textElement = document.createElement('div');
+        textElement.textContent = text;
+        messageElement.appendChild(textElement);
+    }
+
+    // Add image if there's an attachment
+    if (attachment) {
+        const imageElement = document.createElement('img');
+        imageElement.src = attachment;
+        imageElement.classList.add('mt-2', 'max-w-full', 'rounded');
+        imageElement.style.maxHeight = '200px';
+        messageElement.appendChild(imageElement);
+    }
+
     messagesContainer.appendChild(messageElement);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
     if (type === 'user') {
-        publishMessage("SendNewUserMessage", { Text: text });
+        publishMessage("SendNewUserMessage", { Text: text, Attachment: attachment });
         disableSendButton();
         showThinking();
     }
@@ -110,19 +125,89 @@ function disableSendButton() {
     sendBtn.classList.add('opacity-50');
 }
 
+function applyClassToMessageContainer(classname) {
+    const messageContainer = document.getElementById('messages-container-outer');
+    messageContainer.classList.add(classname);
+}
+
+function removeClassFromMessageContainer(classname) {
+    const messageContainer = document.getElementById('messages-container-outer');
+    messageContainer.classList.remove(classname);
+}
+
 function showThinking() {
     const thinkingIndicator = document.getElementById('thinking-indicator');
-    const messageContainer = document.getElementById('messages-container-outer');
     thinkingIndicator.classList.remove('hidden');
-    messageContainer.classList.add('thinking');
+    applyClassToMessageContainer('thinking');
 }
 
 function hideThinking() {
     const thinkingIndicator = document.getElementById('thinking-indicator');
-    const messageContainer = document.getElementById('messages-container-outer');
     thinkingIndicator.classList.add('hidden');
-    messageContainer.classList.remove('thinking');
+    removeClassFromMessageContainer('thinking');
 }
+
+function clearImageAttachment() {
+    const imagePreviewContainer = document.getElementById('image-preview-container');
+    const imageUploadInput = document.getElementById('image-upload');
+    const imagePreview = document.getElementById('image-preview');
+    imagePreviewContainer.classList.add('hidden');
+    imagePreview.src = '';
+    imageUploadInput.value = '';
+    currentAttachment = null;
+    removeClassFromMessageContainer('imgpreview');
+}
+
+function showImageError(message) {
+    const imageError = document.getElementById('image-error');
+    const imageUploadInput = document.getElementById('image-upload');
+    imageError.textContent = message;
+    imageError.classList.remove('hidden');
+    imageUploadInput.value = '';
+}
+
+function hideImageError() {
+    const imageError = document.getElementById('image-error');
+    imageError.classList.add('hidden');
+}
+
+function uploadImageToMessage(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Check if file is an image
+    if (!file.type.startsWith('image/')) {
+        showImageError('Only image files are allowed.');
+        return;
+    }
+
+    // Check file size (5MB max)
+    const MAX_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > MAX_SIZE) {
+        showImageError('Image size must be less than 5MB.');
+        return;
+    }
+
+    // Clear any previous error
+    hideImageError();
+
+    // Preview the image
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        imagePreview.src = event.target.result;
+        imagePreviewContainer.classList.remove('hidden');
+        applyClassToMessageContainer('imgpreview');
+        currentAttachment = {
+            data: event.target.result,
+            file: file
+        };
+    };
+    reader.readAsDataURL(file);
+}
+
+let currentAttachment = null;
 
 async function init() {
     const themeToggle = document.getElementById('theme-toggle');
@@ -134,6 +219,9 @@ async function init() {
     const useEntraID = document.getElementById('useEntraID');
     const closeConfig = document.getElementById('close-config');
     const configDialog = document.getElementById('config-dialog');
+    const attachImageBtn = document.getElementById('attach-image');
+    const imageUploadInput = document.getElementById('image-upload');
+    const removeImageBtn = document.getElementById('remove-image');
 
     // Theme Toggle
     themeToggle.addEventListener('click', () => {
@@ -159,9 +247,15 @@ async function init() {
 
     sendBtn.addEventListener('click', () => {
         const message = messageInput.value.trim();
-        if (message) {
-            addMessage(messagesContainer, message, 'user');
+        if (message || currentAttachment) {
+            const attachmentData = currentAttachment ? currentAttachment.data : null;
+
+            // Add user message
+            addMessage(message, 'user', attachmentData);
+
+            // Clear input and attachment
             messageInput.value = '';
+            clearImageAttachment();
         }
     });
 
@@ -175,6 +269,16 @@ async function init() {
 
     // Connection Configuration
     connectBtn.addEventListener('click', initiateConnection);
+
+    imageUploadInput.addEventListener('change', uploadImageToMessage);
+
+    attachImageBtn.addEventListener('click', () => {
+        imageUploadInput.click();
+    });
+
+    removeImageBtn.addEventListener('click', () => {
+        clearImageAttachment();
+    });
 
     //initConfigPanel(configPanel, configArrow);
     let isDarkMode = await checkIfDarkMode();
@@ -214,8 +318,7 @@ function handleMessage(event) {
     const { message, data } = event;
     console.info("Received message:", message, data);
     if (message === "AssistantMessageResponse") {
-        const messagesContainer = document.getElementById('messages');
-        addMessage(messagesContainer, data, 'bot');
+        addMessage(data, 'bot');
         enableSendButton();
         hideThinking();
     }

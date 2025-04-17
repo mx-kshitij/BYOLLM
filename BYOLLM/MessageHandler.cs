@@ -14,23 +14,10 @@ namespace BYOLLM
 {
     public class MessageHandler
     {
-        //private readonly ILogService _logService;
-        //private readonly IModel _currentApp;
-        //private readonly IBackgroundJobService _bgService;
-        //private readonly IMessageBoxService _msgService;
-
-        //public MessageHandler(IModel currentApp, ILogService logService, IBackgroundJobService bgService, IMessageBoxService msgService)
-        //{
-        //    _logService = logService;
-        //    _currentApp = currentApp;
-        //    _bgService = bgService;
-        //    _msgService = msgService;
-        //}
-
-        public string HandleNewUserMessage(string messageJSON)
+        public MessageModel HandleNewUserMessage(string messageJSON)
         {
             MessageModel message = JsonSerializer.Deserialize<MessageModel>(messageJSON)!;
-            return message.Text;
+            return message;
         }
     }
 
