@@ -1,4 +1,39 @@
-﻿// Message Sending
+﻿function toggleConfigPanel(configPanel, configArrow) {
+    const isExpanded = configPanel.classList.contains('expanded');
+
+    if (isExpanded) {
+        // Collapse
+        configPanel.classList.remove('expanded');
+        configPanel.classList.add('opacity-0');
+        configPanel.style.maxHeight = '0px';
+        configArrow.classList.remove('rotate-180');
+    } else {
+        // Expand
+        configPanel.classList.add('expanded');
+        configPanel.classList.remove('opacity-0');
+        configPanel.style.maxHeight = configPanel.scrollHeight + 'px';
+        configArrow.classList.add('rotate-180');
+    }
+}
+
+// Initialize config panel as expanded by default
+//function initConfigPanel(configPanel, configArrow) {
+    //configData = {
+    //    endpoint: document.getElementById('endpoint').value,
+    //    deployment: document.getElementById('deployment').value,
+    //    version: document.getElementById('version').value,
+    //    useEntraId: document.getElementById('useEntraID').value,
+    //    apikey: document.getElementById('apikey').value
+    //}
+    //let validConfig = false;
+    //if (configData.endpoint !== '' && configData.deployment !== '' && configData.version !== '' && (configData.useEntraID || configData.apikey !== '')) {
+    //    toggleConfigPanel(configPanel, configArrow);
+    //    validConfig = true;
+    //}
+//}
+
+
+// Message Sending
 async function addMessage(messagesContainer, text, type = 'user') {
     const messageElement = document.createElement('div');
     messageElement.classList.add(
@@ -13,8 +48,6 @@ async function addMessage(messagesContainer, text, type = 'user') {
 
     if (type === 'user') {
         publishMessage("SendNewUserMessage", { Text: text });
-        disableSendButton();
-        showThinking();
     }
 }
 
@@ -42,41 +75,24 @@ function validateField(validationElementID, show) {
         validationElement.style.display = 'none';
     }
 }
-
-function showConnectingSpinner() {
-    const connectSpinner = document.getElementById('connect-spinner');
-    const connectBtn = document.getElementById('connect-btn');
-    connectSpinner.classList.remove('hidden');
-    connectBtn.disabled = true;
-}
-
-function hideConnectingSpinner() {
-    const connectSpinner = document.getElementById('connect-spinner');
-    const connectBtn = document.getElementById('connect-btn');
-    connectSpinner.classList.add('hidden');
-    connectBtn.disabled = false;
-}
-
 function initiateConnection() {
     configData = {
         Endpoint: document.getElementById('endpoint').value,
         Deployment: document.getElementById('deployment').value,
-        //Version: document.getElementById('version').value,
+        Version: document.getElementById('version').value,
         UseEntraId: document.getElementById('useEntraID').checked,
-        Apikey: document.getElementById('apikey').value,
-        SystemPrompt: document.getElementById('systemPrompt').value
+        Apikey: document.getElementById('apikey').value
     }
     let validConfig = false;
-    configData.Endpoint === '' ? validateField('endpoint-validation', true) : validateField('endpoint-validation', false);
-    configData.Deployment === '' ? validateField('deployment-validation', true) : validateField('deployment-validation', false);
-    //configData.version === '' ? validateField('version-validation', true) : validateField('version-validation', false);
+    configData.endpoint === '' ? validateField('endpoint-validation', true) : validateField('endpoint-validation', false);
+    configData.deployment === '' ? validateField('deployment-validation', true) : validateField('deployment-validation', false);
+    configData.version === '' ? validateField('version-validation', true) : validateField('version-validation', false);
     !configData.useEntraId && configData.apikey === '' ? validateField('apikey-validation', true) : validateField('apikey-validation', false);
     if (configData.endpoint !== '' && configData.deployment !== '' && configData.version !== '' && (configData.useEntraId || configData.apikey !== '')) {
         validConfig = true;
     }
     if (validConfig) {
         publishMessage("InitiateConnection", configData);
-        showConnectingSpinner();
     }
 }
 
@@ -86,43 +102,12 @@ async function loadConfiguration() {
     if (config) {
         document.getElementById('endpoint').value = config.Endpoint;
         document.getElementById('deployment').value = config.Deployment;
-        //document.getElementById('version').value = config.Version;
+        document.getElementById('version').value = config.Version;
         document.getElementById('useEntraID').checked = config.UseEntraId;
         document.getElementById('apikey').value = config.Apikey;
-        document.getElementById('systemPrompt').value = config.SystemPrompt;
     }
 }
 
-function hideConfigPanel() {
-    const configDialog = document.getElementById('config-dialog');
-    configDialog.classList.add('hidden');
-}
-
-function enableSendButton() {
-    const sendBtn = document.getElementById('send-btn');
-    sendBtn.disabled = false;
-    sendBtn.classList.remove('opacity-50');
-}
-
-function disableSendButton() {
-    const sendBtn = document.getElementById('send-btn');
-    sendBtn.disabled = true;
-    sendBtn.classList.add('opacity-50');
-}
-
-function showThinking() {
-    const thinkingIndicator = document.getElementById('thinking-indicator');
-    const messageContainer = document.getElementById('messages-container-outer');
-    thinkingIndicator.classList.remove('hidden');
-    messageContainer.classList.add('thinking');
-}
-
-function hideThinking() {
-    const thinkingIndicator = document.getElementById('thinking-indicator');
-    const messageContainer = document.getElementById('messages-container-outer');
-    thinkingIndicator.classList.add('hidden');
-    messageContainer.classList.remove('thinking');
-}
 
 async function init() {
     const themeToggle = document.getElementById('theme-toggle');
@@ -131,30 +116,18 @@ async function init() {
     const messagesContainer = document.getElementById('messages');
     const connectBtn = document.getElementById('connect-btn');
     const configToggle = document.getElementById('config-toggle');
+    const configPanel = document.getElementById('config-panel');
+    const configArrow = document.getElementById('config-arrow');
     const useEntraID = document.getElementById('useEntraID');
-    const closeConfig = document.getElementById('close-config');
-    const configDialog = document.getElementById('config-dialog');
 
     // Theme Toggle
     themeToggle.addEventListener('click', () => {
         document.documentElement.classList.toggle('dark');
     });
 
-    // Config Dialog Toggle
+    // Config Panel Toggle
     configToggle.addEventListener('click', () => {
-        configDialog.classList.remove('hidden');
-    });
-
-    // Close Config Dialog
-    closeConfig.addEventListener('click', () => {
-        hideConfigPanel();
-    });
-
-    // Close dialog when clicking outside the config panel
-    configDialog.addEventListener('click', (e) => {
-        if (e.target === configDialog) {
-            hideConfigPanel();
-        }
+        toggleConfigPanel(configPanel, configArrow)
     });
 
     sendBtn.addEventListener('click', () => {
@@ -166,7 +139,7 @@ async function init() {
     });
 
     messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !sendBtn.disabled) {
+        if (e.key === 'Enter') {
             sendBtn.click();
         }
     });
@@ -183,7 +156,6 @@ async function init() {
     }
 
     await loadConfiguration();
-    configDialog.classList.remove('hidden');
 }
 
 function publishMessage(message, data) {
@@ -216,17 +188,6 @@ function handleMessage(event) {
     if (message === "AssistantMessageResponse") {
         const messagesContainer = document.getElementById('messages');
         addMessage(messagesContainer, data, 'bot');
-        enableSendButton();
-        hideThinking();
-    }
-    else if (message === "ConnectionEstablished") {
-        hideConnectingSpinner();
-        hideConfigPanel();
-        showThinking();
-        enableSendButton();
-    }
-    else if (message === "ConnectionFailed") {
-        hideConnectingSpinner();
     }
 }
 

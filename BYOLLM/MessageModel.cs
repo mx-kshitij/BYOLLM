@@ -10,18 +10,14 @@ namespace BYOLLM
     public record MessageModel
     {
         [JsonConstructor]
-        public MessageModel(string id, string text)
+        public MessageModel( string text)
         {
-            Id = id;
+            Id = Guid.NewGuid().ToString();
             Text = text;
         }
 
-        public MessageModel(string text, bool isDone)
-            : this(Guid.NewGuid().ToString(), text)
-        {
-        }
 
-        public string Id { get; set; }
+        public string Id { get; }
         public string Text { get; set; }
     }
 }

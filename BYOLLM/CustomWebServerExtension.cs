@@ -35,7 +35,7 @@ namespace BYOLLM
             webServer.AddRoute("index", ServeIndex);
             webServer.AddRoute("main.js", ServeMainJs);
             webServer.AddRoute("theme", ServeTheme);
-            //webServer.AddRoute("newusermsg", NewUserMessage);
+            webServer.AddRoute("getConfiguration", ServeConfiguration);
             //webServer.AddRoute("connect", InitiateConnection);
         }
 
@@ -58,96 +58,20 @@ namespace BYOLLM
             await JsonSerializer.SerializeAsync(jsonStream, theme, cancellationToken: ct);
             response.SendJsonAndClose(jsonStream);
         }
-        //private async Task NewUserMessage(HttpListenerRequest request, HttpListenerResponse response, CancellationToken ct)
-        //{
-        //    if (CurrentApp == null)
-        //    {
-        //        response.SendNoBodyAndClose(404);
-        //        return;
-        //    }
 
-        //    if (!request.HasEntityBody)
-        //    {
-        //        response.SendNoBodyAndClose(400);
-        //        return;
-        //    }
+        private async Task ServeConfiguration(HttpListenerRequest request, HttpListenerResponse response, CancellationToken ct)
+        {
+            if (CurrentApp == null)
+            {
+                response.SendNoBodyAndClose(404);
+                return;
+            }
 
-        //    System.IO.Stream body = request.InputStream;
-        //    System.Text.Encoding encoding = request.ContentEncoding;
-        //    System.IO.StreamReader reader = new System.IO.StreamReader(body, encoding);
+            ConfigurationModel configuration = new ConfigurationStorage(CurrentApp, _logService).LoadConfiguration();
+            var jsonStream = new MemoryStream();
+            await JsonSerializer.SerializeAsync(jsonStream, configuration, cancellationToken: ct);
 
-        //    string requestBody = "";
-
-        //    try
-        //    {
-        //        requestBody = reader.ReadToEnd();
-        //        var jsonStream = new MemoryStream();
-        //        await JsonSerializer.SerializeAsync(jsonStream, "Added new message", cancellationToken: ct);
-
-        //        response.SendJsonAndClose(jsonStream);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logService.Error("Error parsing ", ex);
-        //    }
-        //    try
-        //    {
-        //        new MessageHandler(CurrentApp, _logService, _bgService, _msgService).HandleNewUserMessage(requestBody);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logService.Error("Failed to add new message", ex);
-        //    }
-
-
-        //    body.Close();
-        //    reader.Close();
-        //}
-
-        //private async Task InitiateConnection(HttpListenerRequest request, HttpListenerResponse response, CancellationToken ct)
-        //{
-        //    if (CurrentApp == null)
-        //    {
-        //        response.SendNoBodyAndClose(404);
-        //        return;
-        //    }
-
-        //    if (!request.HasEntityBody)
-        //    {
-        //        response.SendNoBodyAndClose(400);
-        //        return;
-        //    }
-
-        //    System.IO.Stream body = request.InputStream;
-        //    System.Text.Encoding encoding = request.ContentEncoding;
-        //    System.IO.StreamReader reader = new System.IO.StreamReader(body, encoding);
-
-        //    string requestBody = "";
-
-        //    try
-        //    {
-        //        requestBody = reader.ReadToEnd();
-        //        var jsonStream = new MemoryStream();
-        //        await JsonSerializer.SerializeAsync(jsonStream, "Initiating connection", cancellationToken: ct);
-
-        //        response.SendJsonAndClose(jsonStream);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logService.Error("Error parsing ", ex);
-        //    }
-        //    try
-        //    {
-        //        // implement here
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logService.Error("Failed to connect", ex);
-        //    }
-
-
-        //    body.Close();
-        //    reader.Close();
-        //}
+            response.SendJsonAndClose(jsonStream);
+        }
     }
 }

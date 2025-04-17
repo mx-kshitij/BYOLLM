@@ -14,22 +14,25 @@ namespace BYOLLM
     public class CustomDockablePaneExtension : DockablePaneExtension
     {
         private readonly ILogService _logService;
-        private readonly IBackgroundJobService bgService;
-        private readonly IMessageBoxService msgService;
-        private readonly IDockingWindowService dockingWindowService;
+        private readonly IBackgroundJobService _bgService;
+        private readonly IMessageBoxService _msgService;
+        private readonly IDockingWindowService _dockingWindowService;
         public const string PaneId = "StudioAIDev";
 
         [ImportingConstructor]
         public CustomDockablePaneExtension(ILogService logService, IBackgroundJobService bgService, IMessageBoxService msgService, IDockingWindowService dockingWindowService)
         {
             _logService = logService;
+            _bgService = bgService;
+            _msgService = msgService;
+            _dockingWindowService = dockingWindowService;
         }
 
         public override string Id => PaneId;
 
         public override DockablePaneViewModelBase Open()
         {
-            return new CustomDockablePaneViewModel(WebServerBaseUrl, () => CurrentApp, _logService, bgService, msgService, dockingWindowService) { Title = "Studio AI Dev" };
+            return new CustomDockablePaneViewModel(WebServerBaseUrl, () => CurrentApp, _logService, _bgService, _msgService, _dockingWindowService) { Title = "Studio AI Dev" };
         }
     }
 }
