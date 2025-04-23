@@ -37,11 +37,10 @@ namespace BYOLLM
                 openAIClient = new AzureOpenAIClient(new Uri(config.Endpoint), new AzureKeyCredential(config.Apikey));
             }
 
+            
             ChatClient chatClient = openAIClient.GetChatClient(config.Deployment);
-            if (chatClient != null)
-            {
+
                 new ConfigurationStorage(_currentApp, _logService).SaveConfiguration(config);
-            }
             return chatClient;
         }
     }

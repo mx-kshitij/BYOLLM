@@ -328,6 +328,11 @@ function handleMessage(event) {
         showThinking();
         enableSendButton();
     }
+    else if (message === "ToolResponse") {
+        addMessage(data, 'bot');
+        hideThinking();
+        enableSendButton();
+    }
     else if (message === "ConnectionFailed") {
         hideConnectingSpinner();
     }

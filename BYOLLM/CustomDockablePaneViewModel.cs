@@ -26,6 +26,8 @@ namespace BYOLLM
         private ChatClient? chatClient;
         private ChatCompletion? chatCompletion;
         private List<ChatMessage> conversationHistory;
+        private ChatCompletionOptions options;
+        private ToolsHandler toolsHandler;
 
         public CustomDockablePaneViewModel(Uri baseUri, Func<IModel?> getCurrentApp, ILogService logService, IBackgroundJobService bgService, IMessageBoxService msgService, IDockingWindowService dockingWindowService)
         {
@@ -38,6 +40,8 @@ namespace BYOLLM
             chatClient = null;
             chatCompletion = null;
             conversationHistory = new List<ChatMessage>();
+            options = new ToolsRegistrar().registerTools();
+            toolsHandler = new ToolsHandler(_getCurrentApp());
         }
 
         public override void InitWebView(IWebView webView)
@@ -53,18 +57,11 @@ namespace BYOLLM
                 {
                     var requestBody = args.Data.ToJsonString();
                     MessageModel userMessage = new MessageHandler().HandleNewUserMessage(requestBody);
-                    if(userMessage.Attachment == null)
+                    chatCompletion = AddUserMessage(userMessage);
+                    if(chatCompletion != null)
                     {
-                        conversationHistory.Add(new UserChatMessage(userMessage.Text));
+                        HandleChatResponse(chatCompletion, webView);
                     }
-                    else
-                    {
-                        conversationHistory.Add(new UserChatMessage(userMessage.Text + "attachment: " +userMessage.Attachment));
-                    }
-
-                    chatCompletion = chatClient.CompleteChat(conversationHistory);
-                    conversationHistory.Add(new AssistantChatMessage(chatCompletion.Content[0].Text));
-                    webView.PostMessage("AssistantMessageResponse", chatCompletion.Content[0].Text);
                 }
                 else if (args.Message == "InitiateConnection")
                 {
@@ -74,11 +71,13 @@ namespace BYOLLM
 
                     try
                     {
-                        conversationHistory.Add(new SystemChatMessage(config.SystemPrompt));
-                        chatCompletion = chatClient.CompleteChat(conversationHistory);
-                        conversationHistory.Add(new AssistantChatMessage(chatCompletion.Content[0].Text));
-                        webView.PostMessage("ConnectionEstablished", null);
-                        webView.PostMessage("AssistantMessageResponse", chatCompletion.Content[0].Text);
+                        chatCompletion = AddSystemMessage(config.SystemPrompt);
+                        if(chatCompletion != null)
+                        {
+                            conversationHistory.Add(new AssistantChatMessage(chatCompletion.Content[0].Text));
+                            webView.PostMessage("ConnectionEstablished", null);
+                            webView.PostMessage("AssistantMessageResponse", chatCompletion.Content[0].Text);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -88,6 +87,55 @@ namespace BYOLLM
                 }
             };
 
+        }
+
+        public ChatCompletion AddSystemMessage(string message)
+        {
+            conversationHistory.Add(new SystemChatMessage(message));
+            chatCompletion = chatClient.CompleteChat(conversationHistory, options);
+            return chatCompletion;
+        }
+
+        public ChatCompletion AddUserMessage(MessageModel userMessage)
+        {
+            if (userMessage.Attachment == null)
+            {
+                conversationHistory.Add(new UserChatMessage(userMessage.Text));
+            }
+            else
+            {
+                conversationHistory.Add(new UserChatMessage(userMessage.Text + "attachment: " + userMessage.Attachment));
+            }
+            chatCompletion = chatClient.CompleteChat(conversationHistory, options);
+            return chatCompletion;
+        }
+
+        public void HandleChatResponse(ChatCompletion chatCompletion, IWebView webView)
+        {
+            if (chatCompletion.Content.Count != 0)
+            {
+                conversationHistory.Add(new AssistantChatMessage(chatCompletion.Content[0].Text));
+                webView.PostMessage("AssistantMessageResponse", chatCompletion.Content[0].Text);
+            }
+            if (chatCompletion.ToolCalls.Count != 0)
+            {
+                conversationHistory.Add(new AssistantChatMessage(chatCompletion.ToolCalls));
+                foreach (ChatToolCall toolCall in chatCompletion.ToolCalls)
+                {
+                    string toolResponse = "";
+                    int toolOutput = toolsHandler.HandleTool(toolCall, ref toolResponse);
+                    conversationHistory.Add(new ToolChatMessage(toolCall.Id, toolResponse));
+                    if (toolOutput == 0)
+                    {
+                        webView.PostMessage("ToolResponse", toolResponse);
+                    }
+                    else
+                    {
+                        chatCompletion = AddSystemMessage("Following is the response from the previous tool call. Make it presentable for the user. " + toolResponse);
+                        HandleChatResponse(chatCompletion, webView);
+                    }
+                }
+            }
         }
     }
 }
