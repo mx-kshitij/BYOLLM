@@ -41,7 +41,6 @@ namespace BYOLLM
             chatCompletion = null;
             conversationHistory = new List<ChatMessage>();
             options = new ToolsRegistrar().registerTools();
-            toolsHandler = new ToolsHandler(_getCurrentApp());
         }
 
         public override void InitWebView(IWebView webView)
@@ -52,6 +51,7 @@ namespace BYOLLM
             {
                 var currentApp = _getCurrentApp();
                 if (currentApp == null) return;
+                toolsHandler = new ToolsHandler(currentApp, webView);
 
                 if (args.Message == "SendNewUserMessage")
                 {
@@ -71,7 +71,8 @@ namespace BYOLLM
 
                     try
                     {
-                        chatCompletion = AddSystemMessage(config.SystemPrompt);
+                        string systemPrompt = Defaults.defaultSystemPrompt + " " + config.SystemPrompt;
+                        chatCompletion = AddSystemMessage(systemPrompt);
                         if(chatCompletion != null)
                         {
                             conversationHistory.Add(new AssistantChatMessage(chatCompletion.Content[0].Text));
@@ -117,7 +118,7 @@ namespace BYOLLM
                 conversationHistory.Add(new AssistantChatMessage(chatCompletion.Content[0].Text));
                 webView.PostMessage("AssistantMessageResponse", chatCompletion.Content[0].Text);
             }
-            if (chatCompletion.ToolCalls.Count != 0)
+            else if (chatCompletion.ToolCalls.Count != 0)
             {
                 conversationHistory.Add(new AssistantChatMessage(chatCompletion.ToolCalls));
                 foreach (ChatToolCall toolCall in chatCompletion.ToolCalls)
@@ -125,16 +126,9 @@ namespace BYOLLM
                     string toolResponse = "";
                     int toolOutput = toolsHandler.HandleTool(toolCall, ref toolResponse);
                     conversationHistory.Add(new ToolChatMessage(toolCall.Id, toolResponse));
-                    if (toolOutput == 0)
-                    {
-                        webView.PostMessage("ToolResponse", toolResponse);
-                    }
-                    else
-                    {
-                        chatCompletion = AddSystemMessage("Following is the response from the previous tool call. Make it presentable for the user. " + toolResponse);
-                        HandleChatResponse(chatCompletion, webView);
-                    }
                 }
+                chatCompletion = chatClient.CompleteChat(conversationHistory, options);
+                HandleChatResponse(chatCompletion, webView);
             }
         }
     }

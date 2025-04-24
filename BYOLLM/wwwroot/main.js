@@ -7,10 +7,16 @@
         type === 'user' ? 'border-black' : 'border-gray-400',
         type === 'user' ? 'self-end' : 'self-start'
     );
+    //messageElement.classList.add(
+    //    'p-2', 'rounded', 'max-w-[80%]',
+    //    type === 'user' ? 'message-user' : 'message-bot',
+    //    'self-' + (type === 'user' ? 'end' : 'start')
+    //);
 
     if (text) {
         const textElement = document.createElement('div');
-        textElement.textContent = text;
+        textElement.className = type === 'bot' ? 'formatted-text' : '';
+        textElement.innerHTML = type === 'bot' ? formatText(text) : text;
         messageElement.appendChild(textElement);
     }
 
@@ -205,6 +211,60 @@ function uploadImageToMessage(e) {
         };
     };
     reader.readAsDataURL(file);
+}
+
+function formatText(text) {
+    // Split text into lines to handle lists
+    let lines = text.split('\n');
+    let inList = false;
+    let listType = '';
+
+    lines = lines.map((line, index) => {
+        // Unordered list (starts with - or *)
+        if (line.trim().match(/^[-*]\s/)) {
+            const content = line.trim().replace(/^[-*]\s/, '');
+            if (!inList || listType !== 'ul') {
+                inList = true;
+                listType = 'ul';
+                return `<ul class="list-disc ml-6 my-2"><li>${content}</li>`;
+            }
+            return `<li>${content}</li>`;
+        }
+
+        // Ordered list (starts with 1., 2., etc)
+        if (line.trim().match(/^\d+\.\s/)) {
+            const content = line.trim().replace(/^\d+\.\s/, '');
+            if (!inList || listType !== 'ol') {
+                inList = true;
+                listType = 'ol';
+                return `<ol class="list-decimal ml-6 my-2"><li>${content}</li>`;
+            }
+            return `<li>${content}</li>`;
+        }
+
+        // Close list if we're no longer in a list item
+        if (inList && !line.trim().match(/^[-*\d]\.\s/)) {
+            inList = false;
+            return `</${listType}>${line}`;
+        }
+
+        return line;
+    });
+
+    // Close any open list at the end
+    if (inList) {
+        lines.push(`</${listType}>`);
+    }
+
+    // Join lines back together
+    text = lines.join('\n');
+
+    // Handle existing formatting
+    text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+    text = text.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
+    text = text.replace(/_([^_]+)_/g, '<em>$1</em>');
+
+    return text;
 }
 
 let currentAttachment = null;
