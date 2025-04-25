@@ -1,4 +1,6 @@
 ﻿using Mendix.StudioPro.ExtensionsAPI.Model;
+using Mendix.StudioPro.ExtensionsAPI.Model.DomainModels;
+using Mendix.StudioPro.ExtensionsAPI.Services;
 using Mendix.StudioPro.ExtensionsAPI.UI.WebView;
 using OpenAI.Chat;
 using System;
@@ -15,12 +17,14 @@ namespace BYOLLM
         private IModel currentApp;
         private ModelTools modelTools;
         private IWebView webView;
+        private IDomainModelService domainModelService;
 
-        public ToolsHandler(IModel _currentApp, IWebView _webView)
+        public ToolsHandler(IModel _currentApp, IWebView _webView, IDomainModelService _domainModelService)
         {
             currentApp = _currentApp;
             webView = _webView;
             modelTools = new ModelTools();
+            domainModelService = _domainModelService;
         }
         public int HandleTool(ChatToolCall toolCall, ref string response)
         {
@@ -42,6 +46,8 @@ namespace BYOLLM
                     return HandleCreateAttribute(toolCall, ref response);
                 case nameof(EntityTools.CreateAttributes):
                     return HandleCreateAttributes(toolCall, ref response);
+                case nameof(EntityTools.CreateAssociation):
+                    return HandleCreateAssociation(toolCall, ref response);
                 default:
                     response = "Unknown function call.";
                     return 0;
@@ -144,7 +150,7 @@ namespace BYOLLM
                    !string.IsNullOrEmpty(moduleElement.GetString()) &&
                    !string.IsNullOrEmpty(entityElement.GetString()))
                 {
-                    response = new EntityTools().GetAttributes(currentApp, moduleElement.GetString()!, entityElement.GetString()!);
+                    response = new EntityTools(domainModelService).GetAttributes(currentApp, moduleElement.GetString()!, entityElement.GetString()!);
                     return 1;
                 }
                 response = "Invalid or missing 'module' or 'entity' argument.";
@@ -204,7 +210,7 @@ namespace BYOLLM
                    !string.IsNullOrEmpty(attributeNameElement.GetString()) &&
                    !string.IsNullOrEmpty(attributeTypeElement.GetString()))
                 {
-                    response = new EntityTools().CreateAttribute(currentApp, moduleElement.GetString()!, entityElement.GetString()!, attributeNameElement.GetString()!, attributeTypeElement.GetString()!);
+                    response = new EntityTools(domainModelService).CreateAttribute(currentApp, moduleElement.GetString()!, entityElement.GetString()!, attributeNameElement.GetString()!, attributeTypeElement.GetString()!);
                     return 1;
                 }
                 response = "Invalid or missing 'module', 'entity' or 'attribute' argument.";
@@ -248,10 +254,42 @@ namespace BYOLLM
                         }
                     }
 
-                    response = new EntityTools().CreateAttributes(currentApp, moduleElement.GetString()!, entityElement.GetString()!, attributes);
+                    response = new EntityTools(domainModelService).CreateAttributes(currentApp, moduleElement.GetString()!, entityElement.GetString()!, attributes);
                     return 1;
                 }
                 response = "Invalid or missing 'module', 'entity' or 'attributes' argument.";
+                return 0;
+            }
+            catch (JsonException ex)
+            {
+                response = $"Error parsing JSON: {ex.Message}";
+                return 0;
+            }
+        }
+
+        private int HandleCreateAssociation(ChatToolCall toolCall, ref string response)
+        {
+            try
+            {
+                using JsonDocument argumentsDocument =
+                    JsonDocument.Parse(toolCall.FunctionArguments);
+
+
+                if (argumentsDocument.RootElement.TryGetProperty("originModule", out JsonElement originModuleElement) &&
+                   argumentsDocument.RootElement.TryGetProperty("originEntity", out JsonElement originEntityElement) &&
+                   argumentsDocument.RootElement.TryGetProperty("destinationModule", out JsonElement destinationModuleElement) &&
+                   argumentsDocument.RootElement.TryGetProperty("destinationEntity", out JsonElement destinationEntityElement) &&
+                   argumentsDocument.RootElement.TryGetProperty("associationType", out JsonElement associationTypeElement) &&
+                   !string.IsNullOrEmpty(originModuleElement.GetString()) &&
+                   !string.IsNullOrEmpty(originEntityElement.GetString()) &&
+                   !string.IsNullOrEmpty(destinationModuleElement.GetString()) &&
+                   !string.IsNullOrEmpty(destinationEntityElement.GetString()) &&
+                   !string.IsNullOrEmpty(associationTypeElement.GetString()))
+                {
+                    response = new EntityTools(domainModelService).CreateAssociation(currentApp, originModuleElement.GetString()!, originEntityElement.GetString()!, destinationModuleElement.GetString()!, destinationEntityElement.GetString()!, associationTypeElement.GetString()!);
+                    return 1;
+                }
+                response = "Invalid or missing 'module', 'entity' or 'association type' argument.";
                 return 0;
             }
             catch (JsonException ex)

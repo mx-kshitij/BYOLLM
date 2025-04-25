@@ -19,6 +19,7 @@ namespace BYOLLM
             ChatTool createEntityTool = registerCreateEntityTool();
             ChatTool createAttributeTool = registerCreateAttributeTool();
             ChatTool createAttributesTool = registerCreateAttributesTool();
+            ChatTool createAssociationTool = registerCreateAssociationTool();
             return new()
             {
                 Tools = {
@@ -29,7 +30,8 @@ namespace BYOLLM
                     getEntityAttributesTool,
                     createEntityTool,
                     createAttributeTool,
-                    createAttributesTool
+                    createAttributesTool,
+                    createAssociationTool
                 }
             };
         }
@@ -235,6 +237,43 @@ namespace BYOLLM
                       }
                        },
                        ""required"": [""module"", ""entity"",""attributes""]
+                   }  
+               ")
+             );
+        }
+
+        private ChatTool registerCreateAssociationTool()
+        {
+            return ChatTool.CreateFunctionTool(
+            nameof(EntityTools.CreateAssociation),
+            "Accepts the name of the module of the origin entity, the origin entity, the module name of the destination entity, the destination entity and a type of association between the 2 entities. Key Rule: In a Nto1 association, the origin is the entity that has many. The association is created from the origin to the destination. Example: A Team has many Players. So Player has a Nto1 relation with Team. Player is the origin (N). Team is the destination (1).",
+            BinaryData.FromString(
+                @"  
+                   {  
+                       ""type"": ""object"",  
+                       ""properties"": {  
+                       ""originModule"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module which as the origin entity, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""originEntity"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the origin entity within the origin module, e.g. Account, User""  
+                       },  
+                       ""destinationModule"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module which as the destination entity, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""destinationEntity"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the destination entity within the destination module, e.g. Account, User""  
+                       },  
+                       ""associationType"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The type of the association from the origin to the destination. Possible values are '1to1', 'Nto1' or 'NtoN'""
+                       }
+                       },
+                       ""required"": [""originModule"", ""originEntity"",""destinationModule"",""destinationEntity"",""associationType""]
                    }  
                ")
              );

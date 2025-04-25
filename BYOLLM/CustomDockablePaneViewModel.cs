@@ -23,13 +23,14 @@ namespace BYOLLM
         private readonly IBackgroundJobService _bgService;
         private readonly IMessageBoxService _msgService;
         private readonly IDockingWindowService _dockingWindowService;
+        private readonly IDomainModelService _domainModelService;
         private ChatClient? chatClient;
         private ChatCompletion? chatCompletion;
         private List<ChatMessage> conversationHistory;
         private ChatCompletionOptions options;
         private ToolsHandler toolsHandler;
 
-        public CustomDockablePaneViewModel(Uri baseUri, Func<IModel?> getCurrentApp, ILogService logService, IBackgroundJobService bgService, IMessageBoxService msgService, IDockingWindowService dockingWindowService)
+        public CustomDockablePaneViewModel(Uri baseUri, Func<IModel?> getCurrentApp, ILogService logService, IBackgroundJobService bgService, IMessageBoxService msgService, IDockingWindowService dockingWindowService, IDomainModelService domainModelService)
         {
             _baseUri = baseUri;
             _getCurrentApp = getCurrentApp;
@@ -37,6 +38,7 @@ namespace BYOLLM
             _bgService = bgService;
             _msgService = msgService;
             _dockingWindowService = dockingWindowService;
+            _domainModelService = domainModelService;
             chatClient = null;
             chatCompletion = null;
             conversationHistory = new List<ChatMessage>();
@@ -51,7 +53,7 @@ namespace BYOLLM
             {
                 var currentApp = _getCurrentApp();
                 if (currentApp == null) return;
-                toolsHandler = new ToolsHandler(currentApp, webView);
+                toolsHandler = new ToolsHandler(currentApp, webView, _domainModelService);
 
                 if (args.Message == "SendNewUserMessage")
                 {
@@ -118,7 +120,7 @@ namespace BYOLLM
                 conversationHistory.Add(new AssistantChatMessage(chatCompletion.Content[0].Text));
                 webView.PostMessage("AssistantMessageResponse", chatCompletion.Content[0].Text);
             }
-            else if (chatCompletion.ToolCalls.Count != 0)
+            if (chatCompletion.ToolCalls.Count != 0)
             {
                 conversationHistory.Add(new AssistantChatMessage(chatCompletion.ToolCalls));
                 foreach (ChatToolCall toolCall in chatCompletion.ToolCalls)

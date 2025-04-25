@@ -3,8 +3,10 @@ using BYOLLM.Models;
 using Mendix.StudioPro.ExtensionsAPI.Model;
 using Mendix.StudioPro.ExtensionsAPI.Model.DomainModels;
 using Mendix.StudioPro.ExtensionsAPI.Model.Projects;
+using Mendix.StudioPro.ExtensionsAPI.Services;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.ComponentModel.Design;
 using System.Linq;
 using System.Reflection;
@@ -16,6 +18,12 @@ namespace BYOLLM
 {
     public class EntityTools
     {
+        private IDomainModelService domainModelService;
+
+        public EntityTools(IDomainModelService _domainModelService)
+        {
+            domainModelService = _domainModelService;
+        }
         public string GetAttributes(IModel currentApp, string moduleName, string entityName)
         {
             var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
@@ -84,7 +92,7 @@ namespace BYOLLM
             }
             using (var transaction = currentApp.StartTransaction("Create attributes"))
             {
-                foreach(var attribute in attributes)
+                foreach (var attribute in attributes)
                 {
                     IAttribute newAttribute = currentApp.Create<IAttribute>();
                     var attributeTypeInstance = GetAttributeType(currentApp, attribute.Type);
@@ -102,7 +110,58 @@ namespace BYOLLM
             return $"{attributes.Count} attributes created successfully in entity {entityName} of module {moduleName}";
         }
 
-        public IAttributeType? GetAttributeType(IModel currentApp, string attributeType)
+        public string CreateAssociation(IModel currentApp, string originModuleName, string originEntityName, string destinationModuleName, string destinationEntityName, string associationType)
+        {
+            var originModule = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, originModuleName, StringComparison.OrdinalIgnoreCase));
+            if (originModule == null)
+            {
+                return $"A module with name {originModuleName} was not found";
+            }
+            var originEntity = originModule.DomainModel.GetEntities().FirstOrDefault(e => string.Equals(e.Name, originEntityName, StringComparison.OrdinalIgnoreCase));
+            if (originEntity == null)
+            {
+                return $"An entity with name {originEntityName} was not found in module {originModuleName}";
+            }
+            var destinationModule = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, destinationModuleName, StringComparison.OrdinalIgnoreCase));
+            if (destinationModule == null)
+            {
+                return $"A module with name {destinationModuleName} was not found";
+            }
+            var destinationEntity = destinationModule.DomainModel.GetEntities().FirstOrDefault(e => string.Equals(e.Name, destinationEntityName, StringComparison.OrdinalIgnoreCase));
+            if (destinationEntity == null)
+            {
+                return $"An entity with name {destinationEntityName} was not found in module {destinationModuleName}";
+            }
+            using (var transaction = currentApp.StartTransaction("Create association"))
+            {
+                string associationName = GetValidAssociationName(currentApp, originModule, originEntity, destinationModule, destinationEntity);
+                IAssociation newAssociation = originEntity.AddAssociation(destinationEntity);
+                if (associationType == "1to1")
+                {
+                    newAssociation.Type = AssociationType.Reference;
+                    newAssociation.Owner = AssociationOwner.Both;
+                }
+                else if (associationType == "Nto1")
+                {
+                    newAssociation.Type = AssociationType.Reference;
+                    newAssociation.Owner = AssociationOwner.Default;
+                }
+                else if (associationType == "NtoN")
+                {
+                    newAssociation.Type = AssociationType.ReferenceSet;
+                    newAssociation.Owner = AssociationOwner.Default;
+                }
+                else
+                {
+                    return $"Invalid association type: {associationType}";
+                }
+                newAssociation.Name = associationName;
+                transaction.Commit();
+            }
+            return $"Association created successfully between entity {originEntityName} and {destinationEntityName}";
+        }
+
+        private IAttributeType? GetAttributeType(IModel currentApp, string attributeType)
         {
             return attributeType switch
             {
@@ -118,6 +177,22 @@ namespace BYOLLM
                 "hashedstring" => currentApp.Create<IHashedStringAttributeType>(),
                 _ => null
             };
+        }
+
+        private string GetValidAssociationName(IModel currentApp, IModule originModule, IEntity originEntity, IModule destinationModule, IEntity destinationEntity)
+        {
+            string baseName = $"{originEntity.Name}_{destinationEntity.Name}";
+            string associationName = baseName;
+            int counter = 1;
+
+            var associationsToCheck = domainModelService.GetAllAssociations(currentApp, [originModule, destinationModule]).ToList();
+            while (associationsToCheck.Any(a => string.Equals(a.Association.Name, associationName, StringComparison.OrdinalIgnoreCase)))
+            {
+                associationName = $"{baseName}_{counter}";
+                counter++;
+            }
+
+            return associationName;
         }
 
     }
