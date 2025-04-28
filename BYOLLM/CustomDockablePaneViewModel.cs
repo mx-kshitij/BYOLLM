@@ -8,6 +8,7 @@ using System;
 using System.ClientModel;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -75,11 +76,19 @@ namespace BYOLLM
                     {
                         string systemPrompt = Defaults.defaultSystemPrompt + " " + config.SystemPrompt;
                         chatCompletion = AddSystemMessage(systemPrompt);
+
                         if(chatCompletion != null)
                         {
-                            conversationHistory.Add(new AssistantChatMessage(chatCompletion.Content[0].Text));
                             webView.PostMessage("ConnectionEstablished", null);
-                            webView.PostMessage("AssistantMessageResponse", chatCompletion.Content[0].Text);
+                            if (chatCompletion.Content.Count != 0)
+                            {
+                                conversationHistory.Add(new AssistantChatMessage(chatCompletion.Content[0].Text));
+                                webView.PostMessage("AssistantMessageResponse", chatCompletion.Content[0].Text);
+                            }
+                            else
+                            {
+                                HandleChatResponse(chatCompletion, webView);
+                            }
                         }
                     }
                     catch (Exception ex)

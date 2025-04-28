@@ -33,7 +33,7 @@ namespace BYOLLM
             return "The weather in " + city + " is " + weather;
         }
 
-        public string GetModules(IModel currentApp)
+        public static string GetModules(IModel currentApp)
         {
             var modules = currentApp.Root.GetModules();
             string response = "";
@@ -47,7 +47,7 @@ namespace BYOLLM
             return "Modules available : " + response;
         }
 
-        public string GetEntities(IModel currentApp, string moduleName)
+        public static string GetEntities(IModel currentApp, string moduleName)
         {
             var module = currentApp.Root.GetModules().FirstOrDefault(m => m.Name.Equals(moduleName, StringComparison.OrdinalIgnoreCase));
             string response = "";
@@ -70,7 +70,7 @@ namespace BYOLLM
             return $"A module with name {module.Name} was not found";
         }
 
-        public string CreateEntity(IModel currentApp, string moduleName, string entityName, int locationX = 0, int locationY = 0)
+        public static string CreateEntity(IModel currentApp, string moduleName, string entityName, int locationX = 0, int locationY = 0)
         {
             var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
             if (module == null)
@@ -84,8 +84,48 @@ namespace BYOLLM
                 newEntity.Location = new Location(locationX, locationY);
                 module.DomainModel.AddEntity(newEntity);
                 transaction.Commit();
-            }            
+            }
             return $"An entity with name {entityName} was created in module {moduleName}";
+        }
+
+        public static string MoveEntity(IModel currentApp, string moduleName, string entityName, int newLocationX, int newLocationY)
+        {
+            var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
+            if (module == null)
+            {
+                return $"A module with name {moduleName} was not found";
+            }
+            var entity = module.DomainModel.GetEntities().FirstOrDefault(e => string.Equals(e.Name, entityName, StringComparison.OrdinalIgnoreCase));
+            if (entity == null)
+            {
+                return $"An entity with name {entityName} was not found in module {moduleName}";
+            }
+            using (var transaction = currentApp.StartTransaction("Move Entity"))
+            {
+                entity.Location = new Location(newLocationX, newLocationY);
+                transaction.Commit();
+            }
+            return $"The entity {entityName} was moved to location ({newLocationX}, {newLocationY})";
+        }
+
+        public static string RemoveEntity(IModel currentApp, string moduleName, string entityName)
+        {
+            var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
+            if (module == null)
+            {
+                return $"A module with name {moduleName} was not found";
+            }
+            using (var transaction = currentApp.StartTransaction("Create new Entity"))
+            {
+                var entity = module.DomainModel.GetEntities().FirstOrDefault(e => string.Equals(e.Name, entityName, StringComparison.OrdinalIgnoreCase));
+                if (entity == null)
+                {
+                    return $"An entity with name {entityName} was not found in module {moduleName}";
+                }
+                module.DomainModel.RemoveEntity(entity);
+                transaction.Commit();
+            }
+            return $"An entity with name {entityName} was removed from module {moduleName}";
         }
     }
 }

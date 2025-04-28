@@ -18,13 +18,13 @@ namespace BYOLLM
 {
     public class EntityTools
     {
-        private IDomainModelService domainModelService;
+        private readonly IDomainModelService domainModelService;
 
         public EntityTools(IDomainModelService _domainModelService)
         {
             domainModelService = _domainModelService;
         }
-        public string GetAttributes(IModel currentApp, string moduleName, string entityName)
+        public static string GetAttributes(IModel currentApp, string moduleName, string entityName)
         {
             var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
             if (module == null)
@@ -47,6 +47,27 @@ namespace BYOLLM
             var response = JsonSerializer.Serialize(attributes);
             return $"The attributes in entity {entityName} of module {moduleName} are: {response}";
 
+        }
+
+        public string GetAssociations(IModel currentApp, string moduleName, string entityName)
+        {
+            var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
+            if (module == null)
+            {
+                return $"A module with name {moduleName} was not found";
+            }
+            var entity = module.DomainModel.GetEntities().FirstOrDefault(e => string.Equals(e.Name, entityName, StringComparison.OrdinalIgnoreCase));
+            if (entity == null)
+            {
+                return $"An entity with name {entityName} was not found in module {moduleName}";
+            }
+            var associations = domainModelService.GetAssociationsOfEntity(currentApp, entity, AssociationDirection.Parent);
+            if (associations == null || !associations.Any())
+            {
+                return $"No associations found in entity {entityName} of module {moduleName}";
+            }
+            var response = JsonSerializer.Serialize(associations.Select(a => new AssociationModel(a.Association)));
+            return $"The associations in entity {entityName} of module {moduleName} are: {response}";
         }
 
         public string CreateAttribute(IModel currentApp, string moduleName, string entityName, string attributeName, string attributeType)
@@ -161,7 +182,86 @@ namespace BYOLLM
             return $"Association created successfully between entity {originEntityName} and {destinationEntityName}";
         }
 
-        private IAttributeType? GetAttributeType(IModel currentApp, string attributeType)
+        public static string RemoveAttribute(IModel currentApp, string moduleName, string entityName, string attributeName)
+        {
+            var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
+            if (module == null)
+            {
+                return $"A module with name {moduleName} was not found";
+            }
+            var entity = module.DomainModel.GetEntities().FirstOrDefault(e => string.Equals(e.Name, entityName, StringComparison.OrdinalIgnoreCase));
+            if (entity == null)
+            {
+                return $"An entity with name {entityName} was not found in module {moduleName}";
+            }
+            using (var transaction = currentApp.StartTransaction("Remove attribute"))
+            {
+                var attribute = entity.GetAttributes().FirstOrDefault(a => string.Equals(a.Name, attributeName, StringComparison.OrdinalIgnoreCase));
+                if (attribute == null)
+                {
+                    return $"An attribute with name {attributeName} was not found in entity {entityName} of module {moduleName}";
+                }
+                entity.RemoveAttribute(attribute);
+                transaction.Commit();
+            }
+            return $"Attribute {attributeName} removed successfully from entity {entityName} of module {moduleName}";
+        }
+
+        public static string RemoveAttributes(IModel currentApp, string moduleName, string entityName, List<AttributeModel> attributes)
+        {
+            var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
+            if (module == null)
+            {
+                return $"A module with name {moduleName} was not found";
+            }
+            var entity = module.DomainModel.GetEntities().FirstOrDefault(e => string.Equals(e.Name, entityName, StringComparison.OrdinalIgnoreCase));
+            if (entity == null)
+            {
+                return $"An entity with name {entityName} was not found in module {moduleName}";
+            }
+            using (var transaction = currentApp.StartTransaction("Remove attribute"))
+            {
+                foreach(var attributeItem in attributes)
+                {
+                    var attribute = entity.GetAttributes().FirstOrDefault(a => string.Equals(a.Name, attributeItem.Name, StringComparison.OrdinalIgnoreCase));
+                    if (attribute == null)
+                    {
+                        return $"An attribute with name {attributeItem.Name} was not found in entity {entityName} of module {moduleName}";
+                    }
+                    entity.RemoveAttribute(attribute);
+                }
+                transaction.Commit();
+            }
+            return $"{attributes.Count} Attributes removed successfully from entity {entityName} of module {moduleName}";
+        }
+
+        public string RemoveAssociation(IModel currentApp, string moduleName, string entityName, string associationName)
+        {
+            var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
+            if (module == null)
+            {
+                return $"A module with name {moduleName} was not found";
+            }
+            var entity = module.DomainModel.GetEntities().FirstOrDefault(e => string.Equals(e.Name, entityName, StringComparison.OrdinalIgnoreCase));
+            if (entity == null)
+            {
+                return $"An entity with name {entityName} was not found in module {moduleName}";
+            }
+            using (var transaction = currentApp.StartTransaction("Remove association"))
+            {
+
+                var association = domainModelService.GetAssociationsOfEntity(currentApp, entity, AssociationDirection.Parent).FirstOrDefault(a => string.Equals(a.Association.Name, associationName, StringComparison.OrdinalIgnoreCase));
+                if (association == null)
+                {
+                    return $"An association with name {associationName} was not found in entity {entityName} of module {moduleName}";
+                }
+                entity.DeleteAssociation(association.Association);
+                transaction.Commit();
+            }
+            return $"Association {associationName} removed successfully from entity {entityName} of module {moduleName}";
+        }
+
+        private static IAttributeType? GetAttributeType(IModel currentApp, string attributeType)
         {
             return attributeType switch
             {

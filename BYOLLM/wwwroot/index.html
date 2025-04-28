@@ -49,6 +49,11 @@
             }
         }
 
+        div {
+            -ms-word-break: break-word;
+            word-break: break-word;
+        }
+
         #config-container {
             position: absolute;
             width: 100%;
@@ -175,6 +180,11 @@
                     <input type="text" id="deployment" class="w-full p-2 border rounded text-gray-700 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600">
                     <div id="deployment-validation" class="validation-message">Please enter a valid model deployment name</div>
                 </div>
+
+                <!--<div>
+                    <label for="version" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Version</label>
+                    <input type="text" id="version" class="w-full p-2 border rounded text-gray-700 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600">
+                </div>-->
 
                 <div>
                     <label for="apikey" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">API key</label>

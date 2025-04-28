@@ -12,26 +12,38 @@ namespace BYOLLM
         public ChatCompletionOptions registerTools()
         {
             ChatTool getCurrentWeatherTool = registerWeatherTool();
-            ChatTool sendMessageTool = registerSendMessageTool();
+            //ChatTool sendMessageTool = registerSendMessageTool();
             ChatTool getModuleNamesTool = registerModuleNamesTool();
             ChatTool getEntityNamesTool = registerGetEntitiesTool();
             ChatTool getEntityAttributesTool = registerGetEntityAttributesTool();
+            ChatTool getEntityAssociationsTool = registerGetEntityAssociationsTool();
             ChatTool createEntityTool = registerCreateEntityTool();
+            ChatTool moveEntityTool = registerMoveEntityTool();
+            ChatTool removeEntityTool = registerRemoveEntityTool();
             ChatTool createAttributeTool = registerCreateAttributeTool();
             ChatTool createAttributesTool = registerCreateAttributesTool();
             ChatTool createAssociationTool = registerCreateAssociationTool();
-            return new()
+            ChatTool removeAttributeTool = registerRemoveAttributeTool();
+            ChatTool removeAttributesTool = registerRemoveAttributesTool();
+            ChatTool removeAssociationTool = registerRemoveAssociationTool();
+            return new ChatCompletionOptions()
             {
                 Tools = {
                     getCurrentWeatherTool,
-                    sendMessageTool,
+                    //sendMessageTool,
                     getModuleNamesTool,
                     getEntityNamesTool,
                     getEntityAttributesTool,
+                    getEntityAssociationsTool,
                     createEntityTool,
+                    moveEntityTool,
+                    removeEntityTool,
                     createAttributeTool,
                     createAttributesTool,
-                    createAssociationTool
+                    createAssociationTool,
+                    removeAttributeTool,
+                    removeAttributesTool,
+                    removeAssociationTool
                 }
             };
         }
@@ -107,6 +119,31 @@ namespace BYOLLM
                 ")
              );
         }
+        
+        private ChatTool registerGetEntityAssociationsTool()
+        {
+            return ChatTool.CreateFunctionTool(
+            nameof(EntityTools.GetAssociations),
+            "Get names of associations of an entity in the provided module name. The output is a mix of information and JSON.",
+            BinaryData.FromString(
+                @"
+                    {
+                        ""type"": ""object"",
+                        ""properties"": {
+                        ""module"": {
+                            ""type"": ""string"",
+                            ""description"": ""The name of the module, e.g. Administration, CommunityCommons""
+                        },
+                        ""entity"": {
+                            ""type"": ""string"",
+                            ""description"": ""The name of the entity within the module, e.g. Account, User""
+                        }
+                        },
+                        ""required"": [""module"", ""entity""]
+                    }
+                ")
+             );
+        }
 
         private ChatTool registerGetEntityAttributesTool()
         {
@@ -161,6 +198,64 @@ namespace BYOLLM
                        } 
                        },
                        ""required"": [""module"", ""entity"",""locationX"",""locationY""]
+                   }  
+               ")
+             );
+        }
+
+        private ChatTool registerMoveEntityTool()
+        {
+            return ChatTool.CreateFunctionTool(
+            nameof(ModelTools.MoveEntity),
+            "Accepts the name of a module, an entity and it's new location coordinate x & y to move the entity in the module's domain model at a new location",
+            BinaryData.FromString(
+                @"  
+                   {  
+                       ""type"": ""object"",  
+                       ""properties"": {  
+                       ""module"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""entity"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the entity within the module, e.g. Account, User""  
+                       },  
+                       ""newLocationX"": {  
+                           ""type"": ""integer"",  
+                           ""description"": ""The x coordinate of the location for entity relocation""  
+                       },  
+                       ""newLocationY"": {  
+                           ""type"": ""integer"",  
+                           ""description"": ""The y coordinate of the location for entity relocation""  
+                       } 
+                       },
+                       ""required"": [""module"", ""entity"",""newLocationX"",""newLocationY""]
+                   }  
+               ")
+             );
+        }
+
+        private ChatTool registerRemoveEntityTool()
+        {
+            return ChatTool.CreateFunctionTool(
+            nameof(ModelTools.RemoveEntity),
+            "Accepts the name of a module, an entity to remove the entity in the module's domain model",
+            BinaryData.FromString(
+                @"  
+                   {  
+                       ""type"": ""object"",  
+                       ""properties"": {  
+                       ""module"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""entity"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the entity within the module, e.g. Account, User""  
+                       }
+                       },
+                       ""required"": [""module"", ""entity""]
                    }  
                ")
              );
@@ -274,6 +369,103 @@ namespace BYOLLM
                        }
                        },
                        ""required"": [""originModule"", ""originEntity"",""destinationModule"",""destinationEntity"",""associationType""]
+                   }  
+               ")
+             );
+        }
+
+        private ChatTool registerRemoveAttributeTool()
+        {
+            return ChatTool.CreateFunctionTool(
+            nameof(EntityTools.RemoveAttribute),
+            "Accepts the name of a module, an entity and an attribute name to delete the attribute in the entity mentioned",
+            BinaryData.FromString(
+                @"  
+                   {  
+                       ""type"": ""object"",  
+                       ""properties"": {  
+                       ""module"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""entity"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the entity within the module, e.g. Account, User""  
+                       },  
+                       ""attributeName"": {  
+                           ""type"": ""string"",
+                           ""description"": ""The name of the attribute to be deleted.""  
+                       }
+                       },
+                       ""required"": [""module"", ""entity"",""attributeName""]
+                   }  
+               ")
+             );
+        }
+
+        private ChatTool registerRemoveAttributesTool()
+        {
+            return ChatTool.CreateFunctionTool(
+            nameof(EntityTools.RemoveAttributes),
+            "Accepts the name of a module, an entity and a list of attributes to delete the attribute in the entity mentioned. This tool should take priority if multiple attributes need to be removed from the same entity.",
+            BinaryData.FromString(
+                @"  
+                   {  
+                       ""type"": ""object"",  
+                       ""properties"": {  
+                       ""module"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""entity"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the entity within the module, e.g. Account, User""  
+                       },  
+                       ""attributes"": {  
+                          ""type"": ""array"",  
+                          ""description"": ""A list of attributes to be created, each with a name and type"",  
+                          ""items"": {  
+                              ""type"": ""object"",  
+                              ""properties"": {  
+                                  ""name"": {  
+                                      ""type"": ""string"",  
+                                      ""description"": ""The name of the attribute to be deleted.""  
+                                  } 
+                              },  
+                              ""required"": [""name""]  
+                          }  
+                      }
+                       },
+                       ""required"": [""module"", ""entity"",""attributes""]
+                   }  
+               ")
+             );
+        }
+
+        private ChatTool registerRemoveAssociationTool()
+        {
+            return ChatTool.CreateFunctionTool(
+            nameof(EntityTools.RemoveAssociation),
+            "Accepts the name of a module, an entity and an association to delete the association of the entity mentioned",
+            BinaryData.FromString(
+                @"  
+                   {  
+                       ""type"": ""object"",  
+                       ""properties"": {  
+                       ""module"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""entity"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the entity within the module, e.g. Account, User""  
+                       },  
+                       ""association"": {  
+                           ""type"": ""string"",
+                           ""description"": ""The name of the association to be removed.""  
+                       }
+                       },
+                       ""required"": [""module"", ""entity"",""association""]
                    }  
                ")
              );

@@ -12,8 +12,7 @@ namespace BYOLLM
 {
     public record AttributeModel
     {
-        [JsonConstructor]
-        public AttributeModel( IAttribute attribute)
+        public AttributeModel(IAttribute attribute)
         {
             Name = attribute.Name;
             Type = GetAttributeTypeString(attribute);
