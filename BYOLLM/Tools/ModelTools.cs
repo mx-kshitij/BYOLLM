@@ -70,7 +70,7 @@ namespace BYOLLM
             return $"A module with name {module.Name} was not found";
         }
 
-        public static string CreateEntity(IModel currentApp, string moduleName, string entityName, int locationX = 0, int locationY = 0)
+        public static string CreateEntity(IModel currentApp, string moduleName, string entityName, int locationX = 0, int locationY = 0, bool isPersistent = true)
         {
             var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
             if (module == null)
@@ -82,6 +82,12 @@ namespace BYOLLM
                 IEntity newEntity = currentApp.Create<IEntity>();
                 newEntity.Name = entityName;
                 newEntity.Location = new Location(locationX, locationY);
+                if (!isPersistent)
+                {
+                    INoGeneralization generalization = currentApp.Create<INoGeneralization>();
+                    generalization.Persistable = false;
+                    newEntity.Generalization = generalization;
+                }
                 module.DomainModel.AddEntity(newEntity);
                 transaction.Commit();
             }
@@ -127,5 +133,60 @@ namespace BYOLLM
             }
             return $"An entity with name {entityName} was removed from module {moduleName}";
         }
+
+        public static string GeneralizeEntity(IModel currentApp, string parentModuleName, string parentEntityName, string targetModuleName, string targetEntityName)
+        {
+            var parentModule = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, parentModuleName, StringComparison.OrdinalIgnoreCase));
+            if (parentModule == null)
+            {
+                return $"A module with name {parentModuleName} was not found";
+            }
+            var targetModule = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, targetModuleName, StringComparison.OrdinalIgnoreCase));
+            if (targetModule == null)
+            {
+                return $"A module with name {targetModuleName} was not found";
+            }
+            using (var transaction = currentApp.StartTransaction("Create new Entity"))
+            {
+                var parentEntity = parentModule.DomainModel.GetEntities().FirstOrDefault(e => string.Equals(e.Name, parentEntityName, StringComparison.OrdinalIgnoreCase));
+                if (parentEntity == null)
+                {
+                    return $"An entity with name {parentEntityName} was not found in module {parentModuleName}";
+                }
+                var targetEntity = targetModule.DomainModel.GetEntities().FirstOrDefault(e => string.Equals(e.Name, targetEntityName, StringComparison.OrdinalIgnoreCase));
+                if (targetEntity == null)
+                {
+                    return $"An entity with name {targetEntityName} was not found in module {targetModuleName}";
+                }
+                IGeneralization generalization = currentApp.Create<IGeneralization>();
+                generalization.Generalization = parentEntity.QualifiedName;
+                targetEntity.Generalization = generalization;
+                transaction.Commit();
+            }
+            return $"Entity {targetEntityName} now has a generalization of {parentEntityName}";
+        }
+
+        public static string RemoveEntityGeneralization(IModel currentApp, string moduleName, string entityName)
+        {
+            var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
+            if (module == null)
+            {
+                return $"A module with name {moduleName} was not found";
+            }
+            using (var transaction = currentApp.StartTransaction("Remove Entity Generalization"))
+            {
+                var entity = module.DomainModel.GetEntities().FirstOrDefault(e => string.Equals(e.Name, entityName, StringComparison.OrdinalIgnoreCase));
+                if (entity == null)
+                {
+                    return $"An entity with name {entityName} was not found in module {moduleName}";
+                }
+                INoGeneralization generalization = currentApp.Create<INoGeneralization>();
+                entity.Generalization = generalization;
+
+                transaction.Commit();
+            }
+            return $"The generalization of entity {entityName} was removed in module {moduleName}";
+        }
+
     }
 }

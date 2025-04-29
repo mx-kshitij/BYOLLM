@@ -20,6 +20,8 @@ namespace BYOLLM
             ChatTool createEntityTool = registerCreateEntityTool();
             ChatTool moveEntityTool = registerMoveEntityTool();
             ChatTool removeEntityTool = registerRemoveEntityTool();
+            ChatTool generalizeEntityTool = registerGeneralizeEntityTool();
+            ChatTool removeEntityGeneralizationTool = registerRemoveEntityGeneralizationTool();
             ChatTool createAttributeTool = registerCreateAttributeTool();
             ChatTool createAttributesTool = registerCreateAttributesTool();
             ChatTool createAssociationTool = registerCreateAssociationTool();
@@ -38,6 +40,8 @@ namespace BYOLLM
                     createEntityTool,
                     moveEntityTool,
                     removeEntityTool,
+                    generalizeEntityTool,
+                    removeEntityGeneralizationTool,
                     createAttributeTool,
                     createAttributesTool,
                     createAssociationTool,
@@ -174,7 +178,7 @@ namespace BYOLLM
         {
             return ChatTool.CreateFunctionTool(
             nameof(ModelTools.CreateEntity),
-            "Accepts the name of a module, an entity and it's location coordinate x & y to create the entity in the module's domain model at a location",
+            "Accepts the name of a module, an entity (persistent or non-persistent) and it's location coordinate x & y to create the entity in the module's domain model at a location",
             BinaryData.FromString(
                 @"  
                    {  
@@ -195,9 +199,13 @@ namespace BYOLLM
                        ""locationY"": {  
                            ""type"": ""integer"",  
                            ""description"": ""The y coordinate of the location for entity creation""  
+                       },  
+                       ""isPersistent"": {  
+                           ""type"": ""boolean"",  
+                           ""description"": ""Whether the entity should be persistent(true) or non-persistent (false)""
                        } 
                        },
-                       ""required"": [""module"", ""entity"",""locationX"",""locationY""]
+                       ""required"": [""module"", ""entity"",""locationX"",""locationY"",""isPersistent""]
                    }  
                ")
              );
@@ -241,6 +249,64 @@ namespace BYOLLM
             return ChatTool.CreateFunctionTool(
             nameof(ModelTools.RemoveEntity),
             "Accepts the name of a module, an entity to remove the entity in the module's domain model",
+            BinaryData.FromString(
+                @"  
+                   {  
+                       ""type"": ""object"",  
+                       ""properties"": {  
+                       ""module"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""entity"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the entity within the module, e.g. Account, User""  
+                       }
+                       },
+                       ""required"": [""module"", ""entity""]
+                   }  
+               ")
+             );
+        }
+
+        private ChatTool registerGeneralizeEntityTool()
+        {
+            return ChatTool.CreateFunctionTool(
+            nameof(ModelTools.GeneralizeEntity),
+            "Accepts the name of the module which has target entity, an entity to target, the module name of the parent entity and the parent entity which the target should inherit. Generalization is Mendix's way of creating inheritance. For e.g. Banana and Apple are both Fruits, so in this case Fruit is the parent entity while Banana and Apple are target entities.",
+            BinaryData.FromString(
+                @"  
+                   {  
+                       ""type"": ""object"",  
+                       ""properties"": {  
+                       ""parentModule"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module which has the parent entity, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""parentEntity"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the entity within the parent module, e.g. Account, User""  
+                       },
+                       ""targetModule"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module which has the target entity, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""targetEntity"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the entity which should inherit from the parent entity, e.g. Account, User""  
+                       }
+                       },
+                       ""required"": [""parentModule"", ""parentEntity"", ""targetModule"", ""targetEntity""]
+                   }  
+               ")
+             );
+        }
+
+        private ChatTool registerRemoveEntityGeneralizationTool()
+        {
+            return ChatTool.CreateFunctionTool(
+            nameof(ModelTools.RemoveEntityGeneralization),
+            "Accepts the name of a module, an entity to remove the generalization (inheritance) of the entity in the module's domain model",
             BinaryData.FromString(
                 @"  
                    {  

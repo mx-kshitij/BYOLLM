@@ -56,7 +56,13 @@ namespace BYOLLM
                 
                 case nameof(ModelTools.RemoveEntity):
                     return HandleRemoveEntity(toolCall, ref response);
-                
+
+                case nameof(ModelTools.GeneralizeEntity):
+                    return HandleGeneralizeEntity(toolCall, ref response);
+
+                case nameof(ModelTools.RemoveEntityGeneralization):
+                    return HandleRemoveEntityGeneralization(toolCall, ref response);
+
                 case nameof(EntityTools.CreateAttribute):
                     return HandleCreateAttribute(toolCall, ref response);
                 
@@ -228,12 +234,13 @@ namespace BYOLLM
                    argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement) &&
                    argumentsDocument.RootElement.TryGetProperty("locationX", out JsonElement locationXElement) &&
                    argumentsDocument.RootElement.TryGetProperty("locationY", out JsonElement locationYElement) &&
+                   argumentsDocument.RootElement.TryGetProperty("isPersistent", out JsonElement isPersistentElement) &&
                    !string.IsNullOrEmpty(moduleElement.GetString()) &&
                    !string.IsNullOrEmpty(entityElement.GetString()) &&
                    locationXElement.ValueKind == JsonValueKind.Number && int.IsPositive(locationXElement.GetInt32()) &&
                    locationYElement.ValueKind == JsonValueKind.Number && int.IsPositive(locationYElement.GetInt32()))
                 {
-                    response = ModelTools.CreateEntity(currentApp, moduleElement.GetString()!, entityElement.GetString()!, locationXElement.GetInt32()!, locationYElement.GetInt32()!);
+                    response = ModelTools.CreateEntity(currentApp, moduleElement.GetString()!, entityElement.GetString()!, locationXElement.GetInt32()!, locationYElement.GetInt32()!, isPersistentElement.GetBoolean()!);
                     return 1;
                 }
                 response = "Invalid or missing 'module', 'entity' or 'location' argument.";
@@ -290,6 +297,62 @@ namespace BYOLLM
                    !string.IsNullOrEmpty(entityElement.GetString()))
                 {
                     response = ModelTools.RemoveEntity(currentApp, moduleElement.GetString()!, entityElement.GetString()!);
+                    return 1;
+                }
+                response = "Invalid or missing 'module' or 'entity' argument.";
+                return 0;
+            }
+            catch (JsonException ex)
+            {
+                response = $"Error parsing JSON: {ex.Message}";
+                return 0;
+            }
+        }
+
+        private int HandleGeneralizeEntity(ChatToolCall toolCall, ref string response)
+        {
+            try
+            {
+                using JsonDocument argumentsDocument =
+                    JsonDocument.Parse(toolCall.FunctionArguments);
+
+
+                if (argumentsDocument.RootElement.TryGetProperty("parentModule", out JsonElement parentModuleElement) &&
+                   argumentsDocument.RootElement.TryGetProperty("parentEntity", out JsonElement parentEntityElement) &&
+                   argumentsDocument.RootElement.TryGetProperty("targetModule", out JsonElement targetModuleElement) &&
+                   argumentsDocument.RootElement.TryGetProperty("targetEntity", out JsonElement targetEntityElement) &&
+                   !string.IsNullOrEmpty(parentModuleElement.GetString()) &&
+                   !string.IsNullOrEmpty(parentEntityElement.GetString()) &&
+                   !string.IsNullOrEmpty(targetModuleElement.GetString()) &&
+                   !string.IsNullOrEmpty(targetEntityElement.GetString()))
+                {
+                    response = ModelTools.GeneralizeEntity(currentApp, parentModuleElement.GetString()!, parentEntityElement.GetString()!, targetModuleElement.GetString()!, targetEntityElement.GetString()!);
+                    return 1;
+                }
+                response = "Invalid or missing 'module' or 'entity' argument.";
+                return 0;
+            }
+            catch (JsonException ex)
+            {
+                response = $"Error parsing JSON: {ex.Message}";
+                return 0;
+            }
+        }
+
+        private int HandleRemoveEntityGeneralization(ChatToolCall toolCall, ref string response)
+        {
+            try
+            {
+                using JsonDocument argumentsDocument =
+                    JsonDocument.Parse(toolCall.FunctionArguments);
+
+
+                if (argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement) &&
+                   argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement) &&
+                   !string.IsNullOrEmpty(moduleElement.GetString()) &&
+                   !string.IsNullOrEmpty(entityElement.GetString()))
+                {
+                    response = ModelTools.RemoveEntityGeneralization(currentApp, moduleElement.GetString()!, entityElement.GetString()!);
                     return 1;
                 }
                 response = "Invalid or missing 'module' or 'entity' argument.";

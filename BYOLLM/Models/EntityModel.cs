@@ -12,7 +12,7 @@ namespace BYOLLM
     public record EntityModel
     {
         [JsonConstructor]
-        public EntityModel( string name, Location location, string documentation)
+        public EntityModel( string name, Location location, string documentation, )
         {
             Name = name;
             Location = location;
