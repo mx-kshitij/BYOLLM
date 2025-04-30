@@ -70,7 +70,7 @@ namespace BYOLLM
             return $"A module with name {module.Name} was not found";
         }
 
-        public static string CreateEntity(IModel currentApp, string moduleName, string entityName, int locationX = 0, int locationY = 0, bool isPersistent = true)
+        public static string CreateEntity(IModel currentApp, string moduleName, EntityModel entity)
         {
             var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
             if (module == null)
@@ -80,18 +80,20 @@ namespace BYOLLM
             using (var transaction = currentApp.StartTransaction("Create new Entity"))
             {
                 IEntity newEntity = currentApp.Create<IEntity>();
-                newEntity.Name = entityName;
-                newEntity.Location = new Location(locationX, locationY);
-                if (!isPersistent)
-                {
-                    INoGeneralization generalization = currentApp.Create<INoGeneralization>();
-                    generalization.Persistable = false;
-                    newEntity.Generalization = generalization;
-                }
+                newEntity.Name = entity.Name;
+                newEntity.Location = entity.Location;
+                newEntity.Documentation = entity.Documentation;
+                INoGeneralization generalization = currentApp.Create<INoGeneralization>();
+                generalization.Persistable = entity.IsPersistent;
+                generalization.HasCreatedDate = entity.HasCreatedDate;
+                generalization.HasChangedDate = entity.HasChangedDate;
+                generalization.HasOwner = entity.HasOwner;
+                generalization.HasChangedBy = entity.HasChangedBy;
+                newEntity.Generalization = generalization;
                 module.DomainModel.AddEntity(newEntity);
                 transaction.Commit();
             }
-            return $"An entity with name {entityName} was created in module {moduleName}";
+            return $"An entity with name {entity.Name} was created in module {moduleName}";
         }
 
         public static string MoveEntity(IModel currentApp, string moduleName, string entityName, int newLocationX, int newLocationY)

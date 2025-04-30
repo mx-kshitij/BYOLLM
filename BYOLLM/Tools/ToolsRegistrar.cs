@@ -203,9 +203,29 @@ namespace BYOLLM
                        ""isPersistent"": {  
                            ""type"": ""boolean"",  
                            ""description"": ""Whether the entity should be persistent(true) or non-persistent (false)""
-                       } 
+                       },  
+                       ""documentation"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""Brief text explaining what the entity is for""
+                       },  
+                       ""hasChangedDate"": {  
+                           ""type"": ""boolean"",  
+                           ""description"": ""Whether the system attribute cchangedDate should be enabled. It tracks the last changed timestamp of the record without need of user programming.""
+                       }, 
+                       ""hasCreatedDate"": {  
+                           ""type"": ""boolean"",  
+                           ""description"": ""Whether the system attribute createdDate should be enabled. It tracks the created timestamp of the record without need of user programming.""
+                       },  
+                       ""hasOwner"": {  
+                           ""type"": ""boolean"",  
+                           ""description"": ""Whether the system attribute owner should be enabled. It tracks the user who created the record without need of user programming.""
+                       },  
+                       ""hasChangedBy"": {  
+                           ""type"": ""boolean"",  
+                           ""description"": ""Whether the system attribute changedBy should be enabled. It tracks the user who last changed the record without need of user programming.""
+                       }
                        },
-                       ""required"": [""module"", ""entity"",""locationX"",""locationY"",""isPersistent""]
+                       ""required"": [""module"", ""entity"",""locationX"",""locationY""]
                    }  
                ")
              );

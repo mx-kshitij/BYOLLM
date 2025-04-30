@@ -17,16 +17,16 @@ namespace BYOLLM
         public ConfigurationStorage(IModel currentApp, ILogService logService)
         {
             _logService = logService;
-            _configFilePath = Path.Join(currentApp.Root.DirectoryPath, "byollm.json");
+            _configFilePath = Path.Join(currentApp.Root.DirectoryPath, Defaults.extensionPath);
         }
 
         public ConfigurationModel LoadConfiguration()
         {
             ConfigurationModel? configuration = null;
-
+            string fullPath = Path.Join(_configFilePath, Defaults.configFileName);
             try
             {
-                configuration = JsonSerializer.Deserialize<ConfigurationModel>(File.ReadAllText(_configFilePath, Encoding.UTF8));
+                configuration = JsonSerializer.Deserialize<ConfigurationModel>(File.ReadAllText(fullPath, Encoding.UTF8));
             }
             catch (Exception exception)
             {
@@ -39,7 +39,11 @@ namespace BYOLLM
         public void SaveConfiguration(ConfigurationModel configuration)
         {
             var jsonText = JsonSerializer.Serialize(configuration, new JsonSerializerOptions() { WriteIndented = true });
-            File.WriteAllText(_configFilePath, jsonText, Encoding.UTF8);
+            if (!Directory.Exists(_configFilePath))
+            {
+                Directory.CreateDirectory(_configFilePath);
+            }
+            File.WriteAllText(Path.Join(_configFilePath, Defaults.configFileName), jsonText, Encoding.UTF8);
         }
     }
 }

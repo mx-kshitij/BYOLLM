@@ -235,15 +235,31 @@ namespace BYOLLM
                    argumentsDocument.RootElement.TryGetProperty("locationX", out JsonElement locationXElement) &&
                    argumentsDocument.RootElement.TryGetProperty("locationY", out JsonElement locationYElement) &&
                    argumentsDocument.RootElement.TryGetProperty("isPersistent", out JsonElement isPersistentElement) &&
+                   argumentsDocument.RootElement.TryGetProperty("documentation", out JsonElement documentationElement) &&
+                   argumentsDocument.RootElement.TryGetProperty("hasChangedDate", out JsonElement hasChangedDateElement) &&
+                   argumentsDocument.RootElement.TryGetProperty("hasCreatedDate", out JsonElement hasCreatedDateElement) &&
+                   argumentsDocument.RootElement.TryGetProperty("hasOwner", out JsonElement hasOwnerElement) &&
+                   argumentsDocument.RootElement.TryGetProperty("hasChangedBy", out JsonElement hasChangedByElement) &&
                    !string.IsNullOrEmpty(moduleElement.GetString()) &&
                    !string.IsNullOrEmpty(entityElement.GetString()) &&
                    locationXElement.ValueKind == JsonValueKind.Number && int.IsPositive(locationXElement.GetInt32()) &&
                    locationYElement.ValueKind == JsonValueKind.Number && int.IsPositive(locationYElement.GetInt32()))
                 {
-                    response = ModelTools.CreateEntity(currentApp, moduleElement.GetString()!, entityElement.GetString()!, locationXElement.GetInt32()!, locationYElement.GetInt32()!, isPersistentElement.GetBoolean()!);
+                    response = ModelTools.CreateEntity(
+                        currentApp,
+                        moduleElement.GetString()!,
+                        new EntityModel(
+                            entityElement.GetString()!,
+                            new Location(locationXElement.GetInt32()!, locationYElement.GetInt32()!),
+                            documentationElement.GetString()!,
+                            isPersistentElement.GetBoolean()!,
+                            hasChangedDateElement.GetBoolean()!,
+                            hasCreatedDateElement.GetBoolean()!,
+                            hasOwnerElement.GetBoolean()!,
+                            hasChangedByElement.GetBoolean()!));
                     return 1;
                 }
-                response = "Invalid or missing 'module', 'entity' or 'location' argument.";
+                response = "Invalid or missing 'module', 'entity' or 'other entity' argument.";
                 return 0;
             }
             catch (JsonException ex)

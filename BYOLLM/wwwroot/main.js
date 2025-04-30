@@ -260,9 +260,9 @@ function formatText(text) {
     text = lines.join('\n');
 
     // Handle existing formatting
-    text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+    //text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
     text = text.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
-    text = text.replace(/_([^_]+)_/g, '<em>$1</em>');
+    text = text.replace(/`([^`]+)`/g, '<em>$1</em>');
 
     return text;
 }

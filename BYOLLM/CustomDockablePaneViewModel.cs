@@ -1,18 +1,15 @@
-﻿using Mendix.StudioPro.ExtensionsAPI.Model;
+﻿using BYOLLM.Tools;
+using Mendix.StudioPro.ExtensionsAPI.Model;
+using Mendix.StudioPro.ExtensionsAPI.Model.Microflows;
 using Mendix.StudioPro.ExtensionsAPI.Services;
 using Mendix.StudioPro.ExtensionsAPI.UI.DockablePane;
 using Mendix.StudioPro.ExtensionsAPI.UI.Services;
 using Mendix.StudioPro.ExtensionsAPI.UI.WebView;
+using Microsoft.SemanticKernel;
 using OpenAI.Chat;
-using System;
-using System.ClientModel;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 
 namespace BYOLLM
 {
@@ -110,21 +107,39 @@ namespace BYOLLM
 
         public ChatCompletion AddUserMessage(MessageModel userMessage)
         {
+            Image image = null;
+            string imagePath = "", imageMime = "";
             if (userMessage.Attachment == null)
             {
-                conversationHistory.Add(new UserChatMessage(userMessage.Text));
+                conversationHistory.Add(ChatMessage.CreateUserMessage(userMessage.Text));
             }
             else
             {
-                conversationHistory.Add(new UserChatMessage(userMessage.Text + "attachment: " + userMessage.Attachment));
+                imagePath = Path.Join(_getCurrentApp().Root.DirectoryPath, $"{Defaults.extensionPath}\\{Defaults.imageUploadedName}");
+                imageMime = ImageHandler.SaveBase64ToImage(userMessage.Attachment, imagePath);
+                if (imageMime != null)
+                {
+                    var newMessage = new UserChatMessage(userMessage.Text);
+                    var imageData = File.ReadAllBytes(imagePath);
+                    newMessage.Content.Add(ChatMessageContentPart.CreateImagePart(new BinaryData(imageData), $"{imageMime}"));
+                    conversationHistory.Add(newMessage);
+                }
+                else
+                {
+                    conversationHistory.Add(new UserChatMessage("Image upload failed"));
+                }
             }
             chatCompletion = chatClient.CompleteChat(conversationHistory, options);
+            if (imagePath != "")
+            {
+                File.Delete(imagePath);
+            }
             return chatCompletion;
         }
 
         public void HandleChatResponse(ChatCompletion chatCompletion, IWebView webView)
         {
-            if (chatCompletion.Content.Count != 0)
+            if (chatCompletion.Content.Count != 0 && chatCompletion.Content[0].Text.Trim() !="")
             {
                 conversationHistory.Add(new AssistantChatMessage(chatCompletion.Content[0].Text));
                 webView.PostMessage("AssistantMessageResponse", chatCompletion.Content[0].Text);

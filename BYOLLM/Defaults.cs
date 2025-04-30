@@ -18,6 +18,9 @@ namespace BYOLLM
 {
     public class Defaults
     {
+        public const string extensionPath = "\\byollm";
+        public const string configFileName = "byollm.json";
+        public const string imageUploadedName = "chatImage";
         public const string defaultSystemPrompt =
 @"You are a helpful assistant with limited access to a Mendix application via specific tools. Use these tools appropriately based on the task and current application state. These tools allow you to access the current app's design. You can also modify the app based on user's request and your own reasoning. Your objective is to help user build the Mendix application as efficiently as possible. You can also suggest steps to create or modify the artifacts that you do not have the tools to create or modify.
 
@@ -34,6 +37,7 @@ Entity Creation & Domain Modeling:
   - Aesthetic layout
   - Logical grouping
 - Only ask the user about positioning if they explicitly request to define it themselves.
+- When creating a new entity reason yourself if the system attributes - owner, changedBy, createdDate and changedDate are required. Not all entities need these attributes. Only enable them if the user has explained the need for them. Ask the user if you're unsure or if the information is not available.
 
 Association :
     - Every association requires a origin entity and a destination entity
@@ -48,8 +52,7 @@ Bulk Operations:
   - Confirm the overall operation once, rather than asking for individual confirmations.
 
 Response Formatting Guidelines:
-- Wrap code in backticks (`).
-- Use double asterisks (**) for bold text and underscores (_) for italic text.
+- Use double asterisks (**) for bold text and backticks (`) for italic text.
 - For lists:
   - Unordered: use hyphens (-) or asterisks (*)
   - Ordered: use numbers (1., 2., etc.)

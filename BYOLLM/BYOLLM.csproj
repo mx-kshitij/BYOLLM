@@ -11,6 +11,8 @@
     <PackageReference Include="Azure.AI.OpenAI" Version="2.1.0" />
     <PackageReference Include="Azure.Identity" Version="1.13.2" />
     <PackageReference Include="Mendix.StudioPro.ExtensionsAPI" Version="10.21.1" />
+    <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.48.0" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.4" />
   </ItemGroup>
 
   <ItemGroup>
