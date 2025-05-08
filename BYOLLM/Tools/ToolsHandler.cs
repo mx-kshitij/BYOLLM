@@ -32,28 +32,28 @@ namespace BYOLLM
             {
                 case nameof(ModelTools.GetWeather):
                     return HandleGetWeather(toolCall, ref response);
-                
+
                 //case nameof(ChatTools.SendMessage):
                 //    return HandleSendMessage(toolCall, ref response);
-                
+
                 case nameof(ModelTools.GetModules):
                     return HandleGetModules(toolCall, ref response);
-                
+
                 case nameof(ModelTools.GetEntities):
                     return HandleGetEntities(toolCall, ref response);
-                
+
                 case nameof(EntityTools.GetAttributes):
                     return HandleGetEntityAttributes(toolCall, ref response);
-                
+
                 case nameof(EntityTools.GetAssociations):
                     return HandleGetEntityAssociations(toolCall, ref response);
-                
+
                 case nameof(ModelTools.CreateEntity):
                     return HandleCreateEntity(toolCall, ref response);
-                
+
                 case nameof(ModelTools.MoveEntity):
                     return HandleMoveEntity(toolCall, ref response);
-                
+
                 case nameof(ModelTools.RemoveEntity):
                     return HandleRemoveEntity(toolCall, ref response);
 
@@ -65,22 +65,22 @@ namespace BYOLLM
 
                 case nameof(EntityTools.CreateAttribute):
                     return HandleCreateAttribute(toolCall, ref response);
-                
+
                 case nameof(EntityTools.CreateAttributes):
                     return HandleCreateAttributes(toolCall, ref response);
-                
+
                 case nameof(EntityTools.CreateAssociation):
                     return HandleCreateAssociation(toolCall, ref response);
-                
+
                 case nameof(EntityTools.RemoveAttribute):
                     return HandleRemoveAttribute(toolCall, ref response);
-                
+
                 case nameof(EntityTools.RemoveAttributes):
                     return HandleRemoveAttributes(toolCall, ref response);
-                
+
                 case nameof(EntityTools.RemoveAssociation):
                     return HandleRemoveAssociation(toolCall, ref response);
-                
+
                 default:
                     response = "Unknown function call.";
                     return 0;
@@ -151,11 +151,11 @@ namespace BYOLLM
         {
             try
             {
-                using JsonDocument argumentsDocument =
-                    JsonDocument.Parse(toolCall.FunctionArguments);
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
 
-                if (argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement)
-                    && !string.IsNullOrEmpty(moduleElement.GetString()))
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+
+                if (!string.IsNullOrEmpty(moduleElement.GetString()))
                 {
                     response = ModelTools.GetEntities(currentApp, moduleElement.GetString()!);
                     return 1;
@@ -174,13 +174,12 @@ namespace BYOLLM
         {
             try
             {
-                using JsonDocument argumentsDocument =
-                    JsonDocument.Parse(toolCall.FunctionArguments);
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
 
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement);
 
-                if (argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement) &&
-                   !string.IsNullOrEmpty(moduleElement.GetString()) &&
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
                    !string.IsNullOrEmpty(entityElement.GetString()))
                 {
                     response = EntityTools.GetAttributes(currentApp, moduleElement.GetString()!, entityElement.GetString()!);
@@ -200,13 +199,12 @@ namespace BYOLLM
         {
             try
             {
-                using JsonDocument argumentsDocument =
-                    JsonDocument.Parse(toolCall.FunctionArguments);
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
 
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement);
 
-                if (argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement) &&
-                   !string.IsNullOrEmpty(moduleElement.GetString()) &&
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
                    !string.IsNullOrEmpty(entityElement.GetString()))
                 {
                     response = new EntityTools(domainModelService).GetAssociations(currentApp, moduleElement.GetString()!, entityElement.GetString()!);
@@ -226,21 +224,20 @@ namespace BYOLLM
         {
             try
             {
-                using JsonDocument argumentsDocument =
-                    JsonDocument.Parse(toolCall.FunctionArguments);
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
 
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement);
+                argumentsDocument.RootElement.TryGetProperty("locationX", out JsonElement locationXElement);
+                argumentsDocument.RootElement.TryGetProperty("locationY", out JsonElement locationYElement);
+                argumentsDocument.RootElement.TryGetProperty("isPersistent", out JsonElement isPersistentElement);
+                argumentsDocument.RootElement.TryGetProperty("documentation", out JsonElement documentationElement);
+                argumentsDocument.RootElement.TryGetProperty("hasChangedDate", out JsonElement hasChangedDateElement);
+                argumentsDocument.RootElement.TryGetProperty("hasCreatedDate", out JsonElement hasCreatedDateElement);
+                argumentsDocument.RootElement.TryGetProperty("hasOwner", out JsonElement hasOwnerElement);
+                argumentsDocument.RootElement.TryGetProperty("hasChangedBy", out JsonElement hasChangedByElement);
 
-                if (argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("locationX", out JsonElement locationXElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("locationY", out JsonElement locationYElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("isPersistent", out JsonElement isPersistentElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("documentation", out JsonElement documentationElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("hasChangedDate", out JsonElement hasChangedDateElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("hasCreatedDate", out JsonElement hasCreatedDateElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("hasOwner", out JsonElement hasOwnerElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("hasChangedBy", out JsonElement hasChangedByElement) &&
-                   !string.IsNullOrEmpty(moduleElement.GetString()) &&
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
                    !string.IsNullOrEmpty(entityElement.GetString()) &&
                    locationXElement.ValueKind == JsonValueKind.Number && int.IsPositive(locationXElement.GetInt32()) &&
                    locationYElement.ValueKind == JsonValueKind.Number && int.IsPositive(locationYElement.GetInt32()))
@@ -273,15 +270,14 @@ namespace BYOLLM
         {
             try
             {
-                using JsonDocument argumentsDocument =
-                    JsonDocument.Parse(toolCall.FunctionArguments);
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
 
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement);
+                argumentsDocument.RootElement.TryGetProperty("newLocationX", out JsonElement locationXElement);
+                argumentsDocument.RootElement.TryGetProperty("newLocationY", out JsonElement locationYElement);
 
-                if (argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("newLocationX", out JsonElement locationXElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("newLocationY", out JsonElement locationYElement) &&
-                   !string.IsNullOrEmpty(moduleElement.GetString()) &&
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
                    !string.IsNullOrEmpty(entityElement.GetString()) &&
                    locationXElement.ValueKind == JsonValueKind.Number && int.IsPositive(locationXElement.GetInt32()) &&
                    locationYElement.ValueKind == JsonValueKind.Number && int.IsPositive(locationYElement.GetInt32()))
@@ -303,13 +299,12 @@ namespace BYOLLM
         {
             try
             {
-                using JsonDocument argumentsDocument =
-                    JsonDocument.Parse(toolCall.FunctionArguments);
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
 
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement);
 
-                if (argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement) &&
-                   !string.IsNullOrEmpty(moduleElement.GetString()) &&
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
                    !string.IsNullOrEmpty(entityElement.GetString()))
                 {
                     response = ModelTools.RemoveEntity(currentApp, moduleElement.GetString()!, entityElement.GetString()!);
@@ -329,15 +324,14 @@ namespace BYOLLM
         {
             try
             {
-                using JsonDocument argumentsDocument =
-                    JsonDocument.Parse(toolCall.FunctionArguments);
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
 
+                argumentsDocument.RootElement.TryGetProperty("parentModule", out JsonElement parentModuleElement);
+                argumentsDocument.RootElement.TryGetProperty("parentEntity", out JsonElement parentEntityElement);
+                argumentsDocument.RootElement.TryGetProperty("targetModule", out JsonElement targetModuleElement);
+                argumentsDocument.RootElement.TryGetProperty("targetEntity", out JsonElement targetEntityElement);
 
-                if (argumentsDocument.RootElement.TryGetProperty("parentModule", out JsonElement parentModuleElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("parentEntity", out JsonElement parentEntityElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("targetModule", out JsonElement targetModuleElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("targetEntity", out JsonElement targetEntityElement) &&
-                   !string.IsNullOrEmpty(parentModuleElement.GetString()) &&
+                if (!string.IsNullOrEmpty(parentModuleElement.GetString()) &&
                    !string.IsNullOrEmpty(parentEntityElement.GetString()) &&
                    !string.IsNullOrEmpty(targetModuleElement.GetString()) &&
                    !string.IsNullOrEmpty(targetEntityElement.GetString()))
@@ -359,13 +353,12 @@ namespace BYOLLM
         {
             try
             {
-                using JsonDocument argumentsDocument =
-                    JsonDocument.Parse(toolCall.FunctionArguments);
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
 
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement);
 
-                if (argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement) &&
-                   !string.IsNullOrEmpty(moduleElement.GetString()) &&
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
                    !string.IsNullOrEmpty(entityElement.GetString()))
                 {
                     response = ModelTools.RemoveEntityGeneralization(currentApp, moduleElement.GetString()!, entityElement.GetString()!);
@@ -385,15 +378,14 @@ namespace BYOLLM
         {
             try
             {
-                using JsonDocument argumentsDocument =
-                    JsonDocument.Parse(toolCall.FunctionArguments);
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
 
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement);
+                argumentsDocument.RootElement.TryGetProperty("attributeName", out JsonElement attributeNameElement);
+                argumentsDocument.RootElement.TryGetProperty("attributeType", out JsonElement attributeTypeElement);
 
-                if (argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("attributeName", out JsonElement attributeNameElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("attributeType", out JsonElement attributeTypeElement) &&
-                   !string.IsNullOrEmpty(moduleElement.GetString()) &&
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
                    !string.IsNullOrEmpty(entityElement.GetString()) &&
                    !string.IsNullOrEmpty(attributeNameElement.GetString()) &&
                    !string.IsNullOrEmpty(attributeTypeElement.GetString()))
@@ -415,13 +407,13 @@ namespace BYOLLM
         {
             try
             {
-                using JsonDocument argumentsDocument =
-                    JsonDocument.Parse(toolCall.FunctionArguments);
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
 
-                if (argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("attributes", out JsonElement attributesElement) &&
-                   !string.IsNullOrEmpty(moduleElement.GetString()) &&
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement);
+                argumentsDocument.RootElement.TryGetProperty("attributes", out JsonElement attributesElement);
+
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
                    !string.IsNullOrEmpty(entityElement.GetString()) &&
                    attributesElement.ValueKind == JsonValueKind.Array && attributesElement.GetArrayLength() > 0)
                 {
@@ -459,16 +451,15 @@ namespace BYOLLM
         {
             try
             {
-                using JsonDocument argumentsDocument =
-                    JsonDocument.Parse(toolCall.FunctionArguments);
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
 
+                argumentsDocument.RootElement.TryGetProperty("originModule", out JsonElement originModuleElement);
+                argumentsDocument.RootElement.TryGetProperty("originEntity", out JsonElement originEntityElement);
+                argumentsDocument.RootElement.TryGetProperty("destinationModule", out JsonElement destinationModuleElement);
+                argumentsDocument.RootElement.TryGetProperty("destinationEntity", out JsonElement destinationEntityElement);
+                argumentsDocument.RootElement.TryGetProperty("associationType", out JsonElement associationTypeElement);
 
-                if (argumentsDocument.RootElement.TryGetProperty("originModule", out JsonElement originModuleElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("originEntity", out JsonElement originEntityElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("destinationModule", out JsonElement destinationModuleElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("destinationEntity", out JsonElement destinationEntityElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("associationType", out JsonElement associationTypeElement) &&
-                   !string.IsNullOrEmpty(originModuleElement.GetString()) &&
+                if (!string.IsNullOrEmpty(originModuleElement.GetString()) &&
                    !string.IsNullOrEmpty(originEntityElement.GetString()) &&
                    !string.IsNullOrEmpty(destinationModuleElement.GetString()) &&
                    !string.IsNullOrEmpty(destinationEntityElement.GetString()) &&
@@ -491,14 +482,13 @@ namespace BYOLLM
         {
             try
             {
-                using JsonDocument argumentsDocument =
-                    JsonDocument.Parse(toolCall.FunctionArguments);
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
 
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement);
+                argumentsDocument.RootElement.TryGetProperty("attributeName", out JsonElement attributeNameElement);
 
-                if (argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("attributeName", out JsonElement attributeNameElement) &&
-                   !string.IsNullOrEmpty(moduleElement.GetString()) &&
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
                    !string.IsNullOrEmpty(entityElement.GetString()) &&
                    !string.IsNullOrEmpty(attributeNameElement.GetString()))
                 {
@@ -519,13 +509,13 @@ namespace BYOLLM
         {
             try
             {
-                using JsonDocument argumentsDocument =
-                    JsonDocument.Parse(toolCall.FunctionArguments);
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
 
-                if (argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("attributes", out JsonElement attributesElement) &&
-                   !string.IsNullOrEmpty(moduleElement.GetString()) &&
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement);
+                argumentsDocument.RootElement.TryGetProperty("attributes", out JsonElement attributesElement);
+
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
                    !string.IsNullOrEmpty(entityElement.GetString()) &&
                    attributesElement.ValueKind == JsonValueKind.Array && attributesElement.GetArrayLength() > 0)
                 {
@@ -562,14 +552,13 @@ namespace BYOLLM
         {
             try
             {
-                using JsonDocument argumentsDocument =
-                    JsonDocument.Parse(toolCall.FunctionArguments);
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
 
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement);
+                argumentsDocument.RootElement.TryGetProperty("association", out JsonElement associationElement);
 
-                if (argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement) &&
-                   argumentsDocument.RootElement.TryGetProperty("association", out JsonElement associationElement) &&
-                   !string.IsNullOrEmpty(moduleElement.GetString()) &&
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
                    !string.IsNullOrEmpty(entityElement.GetString()) &&
                    !string.IsNullOrEmpty(associationElement.GetString()))
                 {

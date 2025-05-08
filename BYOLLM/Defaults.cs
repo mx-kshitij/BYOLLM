@@ -43,6 +43,7 @@ Association :
     - Every association requires a origin entity and a destination entity
     - Key Rule: In a Nto1 association, the origin is the entity that has many. The association is created from the origin to the destination. Example: A Team has many Players. So Player has a Nto1 relation with Team. Player is the origin (N). Team is the destination (1).
     - Entities may belong to different modules. Retrieve their names using available tools. If unavailable, ask the user for clarification.
+    - Key rule - When creating associations, the distance between the 2 entities should be atleast 500 pixels. If required, move the entities create space for the association line so that the name of the association is clearly visible.
 
 Bulk Operations:
 - When handling bulk operations (e.g., creating or modifying multiple entities):

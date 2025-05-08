@@ -7,11 +7,6 @@
         type === 'user' ? 'border-black' : 'border-gray-400',
         type === 'user' ? 'self-end' : 'self-start'
     );
-    //messageElement.classList.add(
-    //    'p-2', 'rounded', 'max-w-[80%]',
-    //    type === 'user' ? 'message-user' : 'message-bot',
-    //    'self-' + (type === 'user' ? 'end' : 'start')
-    //);
 
     if (text) {
         const textElement = document.createElement('div');
@@ -82,7 +77,6 @@ function initiateConnection() {
     configData = {
         Endpoint: document.getElementById('endpoint').value,
         Deployment: document.getElementById('deployment').value,
-        //Version: document.getElementById('version').value,
         UseEntraId: document.getElementById('useEntraID').checked,
         Apikey: document.getElementById('apikey').value,
         SystemPrompt: document.getElementById('systemPrompt').value
@@ -90,7 +84,6 @@ function initiateConnection() {
     let validConfig = false;
     configData.Endpoint === '' ? validateField('endpoint-validation', true) : validateField('endpoint-validation', false);
     configData.Deployment === '' ? validateField('deployment-validation', true) : validateField('deployment-validation', false);
-    //configData.version === '' ? validateField('version-validation', true) : validateField('version-validation', false);
     !configData.useEntraId && configData.apikey === '' ? validateField('apikey-validation', true) : validateField('apikey-validation', false);
     if (configData.endpoint !== '' && configData.deployment !== '' && configData.version !== '' && (configData.useEntraId || configData.apikey !== '')) {
         validConfig = true;
@@ -107,7 +100,6 @@ async function loadConfiguration() {
     if (config) {
         document.getElementById('endpoint').value = config.Endpoint;
         document.getElementById('deployment').value = config.Deployment;
-        //document.getElementById('version').value = config.Version;
         document.getElementById('useEntraID').checked = config.UseEntraId;
         document.getElementById('apikey').value = config.Apikey;
         document.getElementById('systemPrompt').value = config.SystemPrompt;
@@ -394,6 +386,11 @@ function handleMessage(event) {
         enableSendButton();
     }
     else if (message === "ConnectionFailed") {
+        hideConnectingSpinner();
+    }
+    else if (message === "Error") {
+        hideThinking();
+        enableSendButton();
         hideConnectingSpinner();
     }
 }

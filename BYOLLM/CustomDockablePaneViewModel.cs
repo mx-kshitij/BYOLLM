@@ -139,22 +139,30 @@ namespace BYOLLM
 
         public void HandleChatResponse(ChatCompletion chatCompletion, IWebView webView)
         {
-            if (chatCompletion.Content.Count != 0 && chatCompletion.Content[0].Text.Trim() !="")
+            try
             {
-                conversationHistory.Add(new AssistantChatMessage(chatCompletion.Content[0].Text));
-                webView.PostMessage("AssistantMessageResponse", chatCompletion.Content[0].Text);
-            }
-            if (chatCompletion.ToolCalls.Count != 0)
-            {
-                conversationHistory.Add(new AssistantChatMessage(chatCompletion.ToolCalls));
-                foreach (ChatToolCall toolCall in chatCompletion.ToolCalls)
+                if (chatCompletion.Content.Count != 0 && chatCompletion.Content[0].Text.Trim() != "")
                 {
-                    string toolResponse = "";
-                    int toolOutput = toolsHandler.HandleTool(toolCall, ref toolResponse);
-                    conversationHistory.Add(new ToolChatMessage(toolCall.Id, toolResponse));
+                    conversationHistory.Add(new AssistantChatMessage(chatCompletion.Content[0].Text));
+                    webView.PostMessage("AssistantMessageResponse", chatCompletion.Content[0].Text);
                 }
-                chatCompletion = chatClient.CompleteChat(conversationHistory, options);
-                HandleChatResponse(chatCompletion, webView);
+                if (chatCompletion.ToolCalls.Count != 0)
+                {
+                    conversationHistory.Add(new AssistantChatMessage(chatCompletion.ToolCalls));
+                    foreach (ChatToolCall toolCall in chatCompletion.ToolCalls)
+                    {
+                        string toolResponse = "";
+                        int toolOutput = toolsHandler.HandleTool(toolCall, ref toolResponse);
+                        conversationHistory.Add(new ToolChatMessage(toolCall.Id, toolResponse));
+                    }
+                    chatCompletion = chatClient.CompleteChat(conversationHistory, options);
+                    HandleChatResponse(chatCompletion, webView);
+                }
+            }
+            catch (Exception ex)
+            {
+                _msgService.ShowError("Connection Failed : " + ex.Message, ex.StackTrace);
+                webView.PostMessage("Error", ex.Message);
             }
         }
     }

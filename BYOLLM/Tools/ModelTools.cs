@@ -2,7 +2,9 @@
 using BYOLLM.Models;
 using Mendix.StudioPro.ExtensionsAPI.Model;
 using Mendix.StudioPro.ExtensionsAPI.Model.DomainModels;
+using Mendix.StudioPro.ExtensionsAPI.Model.Enumerations;
 using Mendix.StudioPro.ExtensionsAPI.Model.Projects;
+using Mendix.StudioPro.ExtensionsAPI.Model.Texts;
 using Mendix.StudioPro.ExtensionsAPI.Services;
 using Mendix.StudioPro.ExtensionsAPI.UI.Services;
 using System;
@@ -188,6 +190,34 @@ namespace BYOLLM
                 transaction.Commit();
             }
             return $"The generalization of entity {entityName} was removed in module {moduleName}";
+        }
+
+        public string CreateNewEnumeration(IModel currentApp, string moduleName, string enumerationName, string[] values)
+        {
+            var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
+            if (module == null)
+            {
+                return $"A module with name {moduleName} was not found";
+            }
+            using (var transaction = currentApp.StartTransaction("Create new Enumeration"))
+            {
+                IEnumeration enumeration = currentApp.Create<IEnumeration>();
+                enumeration.Name = enumerationName;
+                if (values.Length > 0)
+                {
+                    foreach (var value in values)
+                    {
+                        IEnumerationValue enumerationValue = currentApp.Create<IEnumerationValue>();
+                        IText text = currentApp.Create<IText>();
+                        text.AddOrUpdateTranslation("en_US", value);
+                        enumerationValue.Caption = text;
+                        enumeration.AddValue(enumerationValue);
+                    }
+                    module.AddDocument(enumeration);
+                    transaction.Commit();
+                }
+                return $"An enumeration with name {enumerationName} was created in module {moduleName}";
+            }
         }
 
     }
