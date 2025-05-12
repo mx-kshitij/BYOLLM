@@ -28,6 +28,12 @@ namespace BYOLLM
             ChatTool removeAttributeTool = registerRemoveAttributeTool();
             ChatTool removeAttributesTool = registerRemoveAttributesTool();
             ChatTool removeAssociationTool = registerRemoveAssociationTool();
+            ChatTool createEnumerationTool = registerCreateEnumeration();
+            ChatTool addEnumerationItemsTool = registerAddEnumerationItems();
+            ChatTool removeEnumerationItemsTool = registerRemoveEnumerationItems();
+            ChatTool removeEnumerationTool = registerRemoveEnumeration();
+            ChatTool getEnumerationValuesTool = registerGetEnumerationValues();
+            ChatTool updateEnumerationItemTranslationsTool = registerUpdateEnumerationItemTranslations();
             return new ChatCompletionOptions()
             {
                 Tools = {
@@ -47,7 +53,13 @@ namespace BYOLLM
                     createAssociationTool,
                     removeAttributeTool,
                     removeAttributesTool,
-                    removeAssociationTool
+                    removeAssociationTool,
+                    createEnumerationTool,
+                    addEnumerationItemsTool,
+                    removeEnumerationItemsTool,
+                    removeEnumerationTool,
+                    getEnumerationValuesTool,
+                    updateEnumerationItemTranslationsTool
                 }
             };
         }
@@ -123,7 +135,7 @@ namespace BYOLLM
                 ")
              );
         }
-        
+
         private ChatTool registerGetEntityAssociationsTool()
         {
             return ChatTool.CreateFunctionTool(
@@ -552,6 +564,243 @@ namespace BYOLLM
                        }
                        },
                        ""required"": [""module"", ""entity"",""association""]
+                   }  
+               ")
+             );
+        }
+
+        private ChatTool registerCreateEnumeration()
+        {
+            return ChatTool.CreateFunctionTool(
+            nameof(ModelTools.CreateEnumeration),
+            "Accepts the name of a module, an enumeration, language code and a list of values to create an enumeration with values. ",
+            BinaryData.FromString(
+                @"  
+                   {  
+                       ""type"": ""object"",
+                       ""properties"": {  
+                       ""module"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""enumeration"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the enumeration within the module, e.g. ENUM_StatusOptions, ENUM_YesNo, ENUM_TypesOfCars""  
+                       },  
+                       ""language"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The language code for the app, e.g. en_US, nl_NL, etc. Default is en_US""  
+                       },
+                       ""values"": {  
+                          ""type"": ""array"", 
+                          ""description"": ""A list of values to be created, each with a name and value"",  
+                          ""items"": {  
+                              ""type"": ""object"",  
+                              ""properties"": {  
+                                  ""value"": {  
+                                      ""type"": ""string"",  
+                                      ""description"": ""The value to be created. This is the translation for the language specified.""  
+                                  },
+                                 ""name"": {  
+                                      ""type"": ""string"",  
+                                      ""description"": ""The name of the item. It must start with a letter or underscore and can only contain letters, digits and underscores. This must be unique for the enumeration and not language dependent.""  
+                                  }
+                              },  
+                              ""required"": [""value"",""name""]  
+                          }  
+                      }
+                       },
+                       ""required"": [""module"", ""enumeration"",""values"", ""language""]
+                   }  
+               ")
+             );
+        }
+
+        private ChatTool registerAddEnumerationItems()
+        {
+            return ChatTool.CreateFunctionTool(
+            nameof(ModelTools.AddEnumerationItems),
+            "Accepts the name of a module, an enumeration, language code and a list of values to add to an existing enumeration. ",
+            BinaryData.FromString(
+                @"{  
+                       ""type"": ""object"",
+                       ""properties"": {  
+                       ""module"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""enumeration"": {  
+                           ""type"": ""string"",
+                           ""description"": ""The name of the enumeration within the module, e.g. ENUM_StatusOptions, ENUM_YesNo, ENUM_TypesOfCars""  
+                       },  
+                       ""language"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The language code for the app, e.g. en_US, nl_NL, etc. Default is en_US""  
+                       },
+                       ""values"": {  
+                          ""type"": ""array"", 
+                          ""description"": ""A list of values to be created, each with a name and value"",  
+                          ""items"": {  
+                              ""type"": ""object"",  
+                              ""properties"": {  
+                                  ""value"": {  
+                                      ""type"": ""string"",  
+                                      ""description"": ""The value to be created. This is the translation for the language specified.""  
+                                  },
+                                 ""name"": {  
+                                      ""type"": ""string"",  
+                                      ""description"": ""The name of the item. It must start with a letter or underscore and can only contain letters, digits and underscores. This must be unique for the enumeration and not language dependent.""  
+                                  }
+                              },  
+                              ""required"": [""value"",""name""]  
+                          }  
+                      }
+                       },
+                       ""required"": [""module"", ""enumeration"",""values"", ""language""]
+                   }  
+               ")
+             );
+        }
+
+        private ChatTool registerRemoveEnumerationItems()
+        {
+            return ChatTool.CreateFunctionTool(
+            nameof(ModelTools.RemoveEnumerationItems),
+            "Accepts the name of a module, an enumeration and a list of values to remove from the existing enumeration. ",
+            BinaryData.FromString(
+                @"  
+                   {  
+                       ""type"": ""object"",
+                       ""properties"": {  
+                       ""module"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""enumeration"": {  
+                           ""type"": ""string"",
+                           ""description"": ""The name of the enumeration within the module, e.g. ENUM_StatusOptions, ENUM_YesNo, ENUM_TypesOfCars""  
+                       },
+                       ""values"": {  
+                          ""type"": ""array"", 
+                          ""description"": ""A list of values to be removed, each with a name"",  
+                          ""items"": {  
+                              ""type"": ""object"",  
+                              ""properties"": {
+                                 ""name"": {  
+                                      ""type"": ""string"",  
+                                      ""description"": ""The name of the item. It must start with a letter or underscore and can only contain letters, digits and underscores. This must be unique for the enumeration and not language dependent. This must already exist in the enumeration.""  
+                                  }
+                              },  
+                              ""required"": [""name""]  
+                          }  
+                      }
+                       },
+                       ""required"": [""module"", ""enumeration"",""values""]
+                   }  
+               ")
+             );
+        }
+
+        private ChatTool registerRemoveEnumeration()
+        {
+            return ChatTool.CreateFunctionTool(
+            nameof(ModelTools.RemoveEnumeration),
+            "Accepts the name of a module and an enumeration name to delete an existing enumeration. ",
+            BinaryData.FromString(
+                @"  
+                   {  
+                       ""type"": ""object"",
+                       ""properties"": {  
+                       ""module"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""enumeration"": {  
+                           ""type"": ""string"",
+                           ""description"": ""The name of the enumeration within the module, e.g. ENUM_StatusOptions, ENUM_YesNo, ENUM_TypesOfCars""  
+                       }
+                       },
+                       ""required"": [""module"", ""enumeration""]
+                   }  
+               ")
+             );
+        }
+
+        private ChatTool registerGetEnumerationValues()
+        {
+            return ChatTool.CreateFunctionTool(
+            nameof(ModelTools.GetEnumerationValues),
+            "Accepts the name of a module and an enumeration to get values from an existing enumeration. ",
+            BinaryData.FromString(
+                @"  
+                   {  
+                       ""type"": ""object"",
+                       ""properties"": {  
+                       ""module"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""enumeration"": {  
+                           ""type"": ""string"",
+                           ""description"": ""The name of the enumeration within the module, e.g. ENUM_StatusOptions, ENUM_YesNo, ENUM_TypesOfCars""  
+                       },  
+                       ""language"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The language code for the app, e.g. en_US, nl_NL, etc. Default is en_US""  
+                       }
+                       },
+                       ""required"": [""module"", ""enumeration"",""language""]
+                   }  
+               ")
+             );
+        }
+
+        private ChatTool registerUpdateEnumerationItemTranslations()
+        {
+            return ChatTool.CreateFunctionTool(
+            nameof(ModelTools.UpdateEnumerationItems),
+            "Accepts the name of a module, an enumeration, language code and a list of values to update translations of the existing enumeration. ",
+            BinaryData.FromString(
+                @"  
+                   {  
+                       ""type"": ""object"",
+                       ""properties"": {  
+                       ""module"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the module, e.g. Administration, CommunityCommons""  
+                       },  
+                       ""enumeration"": {  
+                           ""type"": ""string"",
+                           ""description"": ""The name of the enumeration within the module, e.g. ENUM_StatusOptions, ENUM_YesNo, ENUM_TypesOfCars""  
+                       },  
+                       ""language"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The language code for the app, e.g. en_US, nl_NL, etc.""  
+                       },
+                       ""values"": {  
+                          ""type"": ""array"", 
+                          ""description"": ""A list of values to be updated, each with a name and value"",  
+                          ""items"": {  
+                              ""type"": ""object"",  
+                              ""properties"": {  
+                                  ""originalName"": {  
+                                      ""type"": ""string"",  
+                                      ""description"": ""The name of an existing item. It must start with a letter or underscore and can only contain letters, digits and underscores. This must be unique for the enumeration and not language dependent. This should already exist in the enumeration.""  
+                                  },
+                                  ""value"": {  
+                                      ""type"": ""string"",  
+                                      ""description"": ""The value to be added. This is the translation for the language specified.""  
+                                  },
+                                 ""name"": {  
+                                      ""type"": ""string"",  
+                                      ""description"": ""The name of an existing item. This should be the same as originalName unless this needs to be updated.""  
+                                  }
+                              },  
+                              ""required"": [""value"",""name"",""originalName""]  
+                          }  
+                      }
+                       },
+                       ""required"": [""module"", ""enumeration"",""values"", ""language""]
                    }  
                ")
              );

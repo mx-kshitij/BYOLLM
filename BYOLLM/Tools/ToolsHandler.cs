@@ -81,6 +81,24 @@ namespace BYOLLM
                 case nameof(EntityTools.RemoveAssociation):
                     return HandleRemoveAssociation(toolCall, ref response);
 
+                case nameof(ModelTools.CreateEnumeration):
+                    return HandleCreateEnumeration(toolCall, ref response);
+
+                case nameof(ModelTools.AddEnumerationItems):
+                    return HandleAddEnumerationItems(toolCall, ref response);
+
+                case nameof(ModelTools.RemoveEnumerationItems):
+                    return HandleRemoveEnumerationItems(toolCall, ref response);
+
+                case nameof(ModelTools.RemoveEnumeration):
+                    return HandleRemoveEnumeration(toolCall, ref response);
+
+                case nameof(ModelTools.GetEnumerationValues):
+                    return HandleGetEnumerationValues(toolCall, ref response);
+
+                case nameof(ModelTools.UpdateEnumerationItems):
+                    return HandleUpdateEnumerationItems(toolCall, ref response);
+
                 default:
                     response = "Unknown function call.";
                     return 0;
@@ -575,5 +593,202 @@ namespace BYOLLM
             }
         }
 
+        private int HandleCreateEnumeration(ChatToolCall toolCall, ref string response)
+        {
+            try
+            {
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
+
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("enumeration", out JsonElement enumerationElement);
+                argumentsDocument.RootElement.TryGetProperty("values", out JsonElement valuesElement);
+                argumentsDocument.RootElement.TryGetProperty("language", out JsonElement languageElement);
+
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
+                   !string.IsNullOrEmpty(enumerationElement.GetString()) &&
+                   valuesElement.ValueKind == JsonValueKind.Array && valuesElement.GetArrayLength() > 0)
+                {
+                    var enumItems = new List<EnumerationItemModel>();
+                    valuesElement.EnumerateArray().ToList().ForEach(value => {
+                        value.TryGetProperty("value", out JsonElement valueElement);
+                        value.TryGetProperty("name", out JsonElement nameElement);
+                        if (!string.IsNullOrEmpty(valueElement.GetString()))
+                        {
+                            enumItems.Add(new EnumerationItemModel(valueElement.ToString()!, nameElement.ToString()!, null));
+                        }
+                    });
+                    response = ModelTools.CreateEnumeration(currentApp, moduleElement.GetString()!, enumerationElement.GetString()!, enumItems, languageElement.GetString()!);
+                    return 1;
+                }
+                response = "Invalid or missing 'module', 'enumeration' or 'values' argument.";
+                return 0;
+            }
+            catch (JsonException ex)
+            {
+                response = $"Error parsing JSON: {ex.Message}";
+                return 0;
+            }
+        }
+
+        private int HandleAddEnumerationItems(ChatToolCall toolCall, ref string response)
+        {
+            try
+            {
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
+
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("enumeration", out JsonElement enumerationElement);
+                argumentsDocument.RootElement.TryGetProperty("values", out JsonElement valuesElement);
+                argumentsDocument.RootElement.TryGetProperty("language", out JsonElement languageElement);
+
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
+                   !string.IsNullOrEmpty(enumerationElement.GetString()) &&
+                   valuesElement.ValueKind == JsonValueKind.Array && valuesElement.GetArrayLength() > 0)
+                {
+                    var enumItems = new List<EnumerationItemModel>();
+                    valuesElement.EnumerateArray().ToList().ForEach(value => {
+                        value.TryGetProperty("value", out JsonElement valueElement);
+                        value.TryGetProperty("name", out JsonElement nameElement);
+                        if (!string.IsNullOrEmpty(valueElement.GetString()))
+                        {
+                            enumItems.Add(new EnumerationItemModel(valueElement.ToString()!, nameElement.ToString()!, null));
+                        }
+                    });
+                    response = ModelTools.AddEnumerationItems(currentApp, moduleElement.GetString()!, enumerationElement.GetString()!, enumItems, languageElement.GetString()!);
+                    return 1;
+                }
+                response = "Invalid or missing 'module', 'enumeration' or 'values' argument.";
+                return 0;
+            }
+            catch (JsonException ex)
+            {
+                response = $"Error parsing JSON: {ex.Message}";
+                return 0;
+            }
+        }
+
+        private int HandleRemoveEnumerationItems(ChatToolCall toolCall, ref string response)
+        {
+            try
+            {
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
+
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("enumeration", out JsonElement enumerationElement);
+                argumentsDocument.RootElement.TryGetProperty("values", out JsonElement valuesElement);
+
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
+                   !string.IsNullOrEmpty(enumerationElement.GetString()) &&
+                   valuesElement.ValueKind == JsonValueKind.Array && valuesElement.GetArrayLength() > 0)
+                {
+                    var enumItems = new List<EnumerationItemModel>();
+                    valuesElement.EnumerateArray().ToList().ForEach(value => {
+                        value.TryGetProperty("name", out JsonElement nameElement);
+                        if (!string.IsNullOrEmpty(nameElement.GetString()))
+                        {
+                            enumItems.Add(new EnumerationItemModel("", nameElement.ToString()!, null));
+                        }
+                    });
+                    response = ModelTools.RemoveEnumerationItems(currentApp, moduleElement.GetString()!, enumerationElement.GetString()!, enumItems);
+                    return 1;
+                }
+                response = "Invalid or missing 'module', 'enumeration' or 'values' argument.";
+                return 0;
+            }
+            catch (JsonException ex)
+            {
+                response = $"Error parsing JSON: {ex.Message}";
+                return 0;
+            }
+        }
+
+        private int HandleRemoveEnumeration(ChatToolCall toolCall, ref string response)
+        {
+            try
+            {
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
+
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("enumeration", out JsonElement enumerationElement);
+
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
+                   !string.IsNullOrEmpty(enumerationElement.GetString()))
+                {
+                    response = ModelTools.RemoveEnumeration(currentApp, moduleElement.GetString()!, enumerationElement.GetString()!);
+                    return 1;
+                }
+                response = "Invalid or missing 'module' or 'enumeration' argument.";
+                return 0;
+            }
+            catch (JsonException ex)
+            {
+                response = $"Error parsing JSON: {ex.Message}";
+                return 0;
+            }
+        }
+
+        private int HandleGetEnumerationValues(ChatToolCall toolCall, ref string response)
+        {
+            try
+            {
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
+
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("enumeration", out JsonElement enumerationElement);
+                argumentsDocument.RootElement.TryGetProperty("language", out JsonElement languageElement);
+
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
+                   !string.IsNullOrEmpty(enumerationElement.GetString()))
+                {
+                    response = ModelTools.GetEnumerationValues(currentApp, moduleElement.GetString()!, enumerationElement.GetString()!, languageElement.GetString()!);
+                    return 1;
+                }
+                response = "Invalid or missing 'module' or 'enumeration' argument.";
+                return 0;
+            }
+            catch (JsonException ex)
+            {
+                response = $"Error parsing JSON: {ex.Message}";
+                return 0;
+            }
+        }
+
+        private int HandleUpdateEnumerationItems(ChatToolCall toolCall, ref string response)
+        {
+            try
+            {
+                using JsonDocument argumentsDocument = JsonDocument.Parse(toolCall.FunctionArguments);
+
+                argumentsDocument.RootElement.TryGetProperty("module", out JsonElement moduleElement);
+                argumentsDocument.RootElement.TryGetProperty("enumeration", out JsonElement enumerationElement);
+                argumentsDocument.RootElement.TryGetProperty("values", out JsonElement valuesElement);
+                argumentsDocument.RootElement.TryGetProperty("language", out JsonElement languageElement);
+
+                if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
+                   !string.IsNullOrEmpty(enumerationElement.GetString()) &&
+                   valuesElement.ValueKind == JsonValueKind.Array && valuesElement.GetArrayLength() > 0)
+                {
+                    var enumItems = new List<EnumerationItemModel>();
+                    valuesElement.EnumerateArray().ToList().ForEach(value => {
+                        value.TryGetProperty("value", out JsonElement valueElement);
+                        value.TryGetProperty("name", out JsonElement nameElement);
+                        value.TryGetProperty("originalName", out JsonElement originalNameElement);
+                        if (!string.IsNullOrEmpty(valueElement.GetString()))
+                        {
+                            enumItems.Add(new EnumerationItemModel(valueElement.ToString()!, nameElement.ToString()!, originalNameElement.ToString()!));
+                        }
+                    });
+                    response = ModelTools.UpdateEnumerationItems(currentApp, moduleElement.GetString()!, enumerationElement.GetString()!, enumItems, languageElement.GetString()!);
+                    return 1;
+                }
+                response = "Invalid or missing 'module', 'enumeration' or 'values' argument.";
+                return 0;
+            }
+            catch (JsonException ex)
+            {
+                response = $"Error parsing JSON: {ex.Message}";
+                return 0;
+            }
+        }
     }
 }

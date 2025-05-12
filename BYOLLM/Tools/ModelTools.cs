@@ -192,7 +192,7 @@ namespace BYOLLM
             return $"The generalization of entity {entityName} was removed in module {moduleName}";
         }
 
-        public string CreateNewEnumeration(IModel currentApp, string moduleName, string enumerationName, string[] values)
+        public static string CreateEnumeration(IModel currentApp, string moduleName, string enumerationName, List<EnumerationItemModel> enumItems, string language = "en_US")
         {
             var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
             if (module == null)
@@ -203,14 +203,15 @@ namespace BYOLLM
             {
                 IEnumeration enumeration = currentApp.Create<IEnumeration>();
                 enumeration.Name = enumerationName;
-                if (values.Length > 0)
+                if (enumItems.Count > 0)
                 {
-                    foreach (var value in values)
+                    foreach (EnumerationItemModel enumItem in enumItems)
                     {
                         IEnumerationValue enumerationValue = currentApp.Create<IEnumerationValue>();
                         IText text = currentApp.Create<IText>();
-                        text.AddOrUpdateTranslation("en_US", value);
+                        text.AddOrUpdateTranslation(language, enumItem.Value);
                         enumerationValue.Caption = text;
+                        enumerationValue.Name = enumItem.Name;
                         enumeration.AddValue(enumerationValue);
                     }
                     module.AddDocument(enumeration);
@@ -220,5 +221,160 @@ namespace BYOLLM
             }
         }
 
+        public static string AddEnumerationItems(IModel currentApp, string moduleName, string enumerationName, List<EnumerationItemModel> enumItems, string language = "en_US")
+        {
+            var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
+            if (module == null)
+            {
+                return $"A module with name {moduleName} was not found";
+            }
+            IEnumeration? enumeration = module.GetDocuments().FirstOrDefault(e => e.Name == enumerationName) as IEnumeration;
+            if (enumeration == null)
+            {
+                return $"An enumeration with name {enumerationName} was not found in module {moduleName}";
+            }
+            using (var transaction = currentApp.StartTransaction("Create new enumeration items"))
+            {
+                if (enumItems.Count > 0)
+                {
+                    foreach (EnumerationItemModel enumItem in enumItems)
+                    {
+                        IEnumerationValue enumerationValue = currentApp.Create<IEnumerationValue>();
+                        IText text = currentApp.Create<IText>();
+                        text.AddOrUpdateTranslation(language, enumItem.Value);
+                        enumerationValue.Caption = text;
+                        enumerationValue.Name = enumItem.Name;
+                        enumeration.AddValue(enumerationValue);
+                    }
+                    transaction.Commit();
+                }
+                return $"New values were added to enumeration {enumerationName} in module {moduleName}";
+            }
+        }
+
+        public static string RemoveEnumerationItems(IModel currentApp, string moduleName, string enumerationName, List<EnumerationItemModel> enumItems)
+        {
+            var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
+            if (module == null)
+            {
+                return $"A module with name {moduleName} was not found";
+            }
+            IEnumeration? enumeration = module.GetDocuments().FirstOrDefault(e => e.Name == enumerationName) as IEnumeration;
+            if (enumeration == null)
+            {
+                return $"An enumeration with name {enumerationName} was not found in module {moduleName}";
+            }
+            using (var transaction = currentApp.StartTransaction("Remove enumeration items"))
+            {
+                if (enumItems.Count > 0)
+                {
+                    IReadOnlyList<IEnumerationValue>? enumerationValueList = enumeration.GetValues();
+                    if(enumerationValueList == null || enumerationValueList.Count == 0)
+                    {
+                        return $"The enumeration {enumerationName} has no values";
+                    }
+                    foreach (EnumerationItemModel enumItem in enumItems)
+                    {
+                        IEnumerationValue? enumerationValue = enumerationValueList.FirstOrDefault(e => e.Name == enumItem.Name);
+                        if(enumerationValue == null)
+                        {
+                            return $"A value with name {enumItem.Name} was not found in {enumerationName} in module {moduleName}";
+                        }
+                        enumeration.RemoveValue(enumerationValue);
+                    }
+                    transaction.Commit();
+                }
+                return $"Values were removed from enumeration {enumerationName} in module {moduleName}";
+            }
+        }
+
+        public static string RemoveEnumeration(IModel currentApp, string moduleName, string enumerationName)
+        {
+            var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
+            if (module == null)
+            {
+                return $"A module with name {moduleName} was not found";
+            }
+            IEnumeration? enumeration = module.GetDocuments().FirstOrDefault(e => e.Name == enumerationName) as IEnumeration;
+            if (enumeration == null)
+            {
+                return $"An enumeration with name {enumerationName} was not found in module {moduleName}";
+            }
+            using (var transaction = currentApp.StartTransaction("Remove enumeration items"))
+            {
+                module.RemoveDocument(enumeration);
+                transaction.Commit();
+                
+                return $"Enumeration {enumerationName} was deleted in module {moduleName}";
+            }
+        }
+
+        public static string GetEnumerationValues(IModel currentApp, string moduleName, string enumerationName, string language = "en_US")
+        {
+            var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
+            if (module == null)
+            {
+                return $"A module with name {moduleName} was not found";
+            }
+            IEnumeration? enumeration = module.GetDocuments().FirstOrDefault(e => e.Name == enumerationName) as IEnumeration;
+            if (enumeration == null)
+            {
+                return $"An enumeration with name {enumerationName} was not found in module {moduleName}";
+            }
+            using (var transaction = currentApp.StartTransaction("Remove enumeration items"))
+            {
+                IReadOnlyList<IEnumerationValue>? enumerationValueList = enumeration.GetValues();
+                if (enumerationValueList == null || enumerationValueList.Count == 0)
+                {
+                    return $"The enumeration {enumerationName} has no values";
+                }
+                List<EnumerationItemModel> enumValuesList = new List<EnumerationItemModel>();
+                foreach (var item in enumerationValueList)
+                {
+                    string enumValue = item.Caption.GetTranslations()?.FirstOrDefault(i => i.LanguageCode == language)?.Text ?? "";
+                    EnumerationItemModel enumValueItem = new EnumerationItemModel(enumValue, item.Name, null);
+                    enumValuesList.Add(enumValueItem);
+                }
+                string response = JsonSerializer.Serialize(enumValuesList);
+                return $"Enumeration {enumerationName} in module {moduleName} for language {language} has values : {response}";
+            }
+        }
+
+        public static string UpdateEnumerationItems(IModel currentApp, string moduleName, string enumerationName, List<EnumerationItemModel> enumItems, string language = "en_US")
+        {
+            var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
+            if (module == null)
+            {
+                return $"A module with name {moduleName} was not found";
+            }
+            IEnumeration? enumeration = module.GetDocuments().FirstOrDefault(e => e.Name == enumerationName) as IEnumeration;
+            if (enumeration == null)
+            {
+                return $"An enumeration with name {enumerationName} was not found in module {moduleName}";
+            }
+            using (var transaction = currentApp.StartTransaction("Create new enumeration items"))
+            {
+                if (enumItems.Count > 0)
+                {
+                    foreach (EnumerationItemModel enumItem in enumItems)
+                    {
+                        IReadOnlyList<IEnumerationValue>? enumerationValueList = enumeration.GetValues();
+                        if (enumerationValueList == null || enumerationValueList.Count == 0)
+                        {
+                            return $"The enumeration {enumerationName} has no values";
+                        }
+                        IEnumerationValue? enumerationValueItem = enumerationValueList.FirstOrDefault(e => e.Name == enumItem.OriginalName);
+                        if (enumerationValueItem == null)
+                        {
+                            return $"An enumeration value with name {enumItem.Name} was not found in enumeration {enumerationName}";
+                        }
+                        enumerationValueItem.Caption.AddOrUpdateTranslation(language, enumItem.Value);
+                        enumerationValueItem.Name = enumItem.Name;
+                    }
+                    transaction.Commit();
+                }
+                return $"New translations were added to enumeration {enumerationName} in module {moduleName}";
+            }
+        }
     }
 }

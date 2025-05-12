@@ -36,7 +36,7 @@ namespace BYOLLM
             webServer.AddRoute("main.js", ServeMainJs);
             webServer.AddRoute("theme", ServeTheme);
             webServer.AddRoute("getConfiguration", ServeConfiguration);
-            //webServer.AddRoute("connect", InitiateConnection);
+            webServer.AddRoute("currentLanguage", ServeCurrentLanguage);
         }
 
         private async Task ServeIndex(HttpListenerRequest request, HttpListenerResponse response, CancellationToken ct)
@@ -56,6 +56,14 @@ namespace BYOLLM
             var theme = Configuration.Theme.ToString();
             var jsonStream = new MemoryStream();
             await JsonSerializer.SerializeAsync(jsonStream, theme, cancellationToken: ct);
+            response.SendJsonAndClose(jsonStream);
+        }
+
+        private async Task ServeCurrentLanguage(HttpListenerRequest request, HttpListenerResponse response, CancellationToken ct)
+        {
+            var currentLanguage = Configuration.CurrentLanguage;
+            var jsonStream = new MemoryStream();
+            await JsonSerializer.SerializeAsync(jsonStream, currentLanguage, cancellationToken: ct);
             response.SendJsonAndClose(jsonStream);
         }
 
