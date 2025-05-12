@@ -13,7 +13,7 @@ namespace BYOLLM
         {
             ChatTool getCurrentWeatherTool = registerWeatherTool();
             //ChatTool sendMessageTool = registerSendMessageTool();
-            ChatTool getModuleNamesTool = registerModuleNamesTool();
+            ChatTool getModuleNamesTool = registerGetModuleNamesTool();
             ChatTool getEntityNamesTool = registerGetEntitiesTool();
             ChatTool getEntityAttributesTool = registerGetEntityAttributesTool();
             ChatTool getEntityAssociationsTool = registerGetEntityAssociationsTool();
@@ -106,9 +106,8 @@ namespace BYOLLM
              );
         }
 
-        private ChatTool registerModuleNamesTool()
+        private ChatTool registerGetModuleNamesTool()
         {
-            //return ChatTool.CreateFunctionTool(nameof(ModelTools.GetModules),"Get names of the modules available in the current Mendix app");
             return ChatTool.CreateFunctionTool(
             nameof(ModelTools.GetModules),
             "Get names of the modules available in the current Mendix app. The output is a mix of information and JSON."
