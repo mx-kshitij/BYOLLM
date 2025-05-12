@@ -16,17 +16,21 @@ namespace BYOLLM
         {
             Name = attribute.Name;
             Type = GetAttributeTypeString(attribute);
+            EnumerationName = attribute is IEnumerationAttributeType enumAttr ? enumAttr.Enumeration.Name : String.Empty;
         }
 
         [JsonConstructor]
-        public AttributeModel(string name, string type)
+        public AttributeModel(string name, string type, string? enumerationName)
         {
             Name = name;
             Type = type;
+            EnumerationName = enumerationName ?? String.Empty;
         }
 
         public string Name { get; set; }
         public string Type { get; set; }
+        public string EnumerationName { get; set; }
+
 
         private static string GetAttributeTypeString(IAttribute attribute)
         {

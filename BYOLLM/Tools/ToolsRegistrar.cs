@@ -384,9 +384,13 @@ namespace BYOLLM
                        ""attributeType"": {  
                            ""type"": ""string"",  
                            ""description"": ""The type of attribute to be created. Type can be string, integer, long, boolean, decimal, datetime, binary, enumeration, autonumber or hashedstring. An enumeration object needs to be created before it is used as an attribute type.""  
-                       } 
+                       },  
+                       ""attributeEnumerationName"": {  
+                           ""type"": ""string"",  
+                           ""description"": ""The name of the enumeration in the same module which can be used. In cases like tracking fixed statuses or progress of workflows, etc enumerations can be used. For e.g. an enumeration for Yes, No and Maybe. Another examples is for rating scale of 1 to 10.""  
+                       }
                        },
-                       ""required"": [""module"", ""entity"",""attributeName"",""attributeType""]
+                       ""required"": [""module"", ""entity"",""attributeName"",""attributeType"",""attributeEnumerationName""]
                    }  
                ")
              );
@@ -423,9 +427,13 @@ namespace BYOLLM
                                   ""type"": {  
                                       ""type"": ""string"",  
                                       ""description"": ""The type of the attribute to be created. Type can be string, integer, long, boolean, decimal, datetime, binary, enumeration, autonumber or hashedstring. An enumeration object needs to be created before it is used as an attribute type.""
+                                  },  
+                                  ""enumerationName"": {  
+                                      ""type"": ""string"",  
+                                      ""description"": ""The name of the enumeration in the same module which can be used. In cases like tracking fixed statuses or progress of workflows, etc enumerations can be used. For e.g. an enumeration for Yes, No and Maybe. Another examples is for rating scale of 1 to 10.""
                                   }  
                               },  
-                              ""required"": [""name"", ""type""]  
+                              ""required"": [""name"", ""type"", ""enumerationName""]  
                           }  
                       }
                        },

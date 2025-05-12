@@ -402,13 +402,14 @@ namespace BYOLLM
                 argumentsDocument.RootElement.TryGetProperty("entity", out JsonElement entityElement);
                 argumentsDocument.RootElement.TryGetProperty("attributeName", out JsonElement attributeNameElement);
                 argumentsDocument.RootElement.TryGetProperty("attributeType", out JsonElement attributeTypeElement);
+                argumentsDocument.RootElement.TryGetProperty("attributeEnumerationName", out JsonElement attributeEnumerationElement);
 
                 if (!string.IsNullOrEmpty(moduleElement.GetString()) &&
                    !string.IsNullOrEmpty(entityElement.GetString()) &&
                    !string.IsNullOrEmpty(attributeNameElement.GetString()) &&
                    !string.IsNullOrEmpty(attributeTypeElement.GetString()))
                 {
-                    response = new EntityTools(domainModelService).CreateAttribute(currentApp, moduleElement.GetString()!, entityElement.GetString()!, attributeNameElement.GetString()!, attributeTypeElement.GetString()!);
+                    response = new EntityTools(domainModelService).CreateAttribute(currentApp, moduleElement.GetString()!, entityElement.GetString()!, attributeNameElement.GetString()!, attributeTypeElement.GetString()!, attributeEnumerationElement.GetString()!);
                     return 1;
                 }
                 response = "Invalid or missing 'module', 'entity' or 'attribute' argument.";
@@ -438,12 +439,13 @@ namespace BYOLLM
                     var attributes = new List<AttributeModel>();
                     foreach (var attribute in attributesElement.EnumerateArray())
                     {
-                        if (attribute.TryGetProperty("name", out JsonElement nameElement) &&
-                            attribute.TryGetProperty("type", out JsonElement typeElement) &&
-                            !string.IsNullOrEmpty(nameElement.GetString()) &&
+                        attribute.TryGetProperty("name", out JsonElement nameElement);
+                        attribute.TryGetProperty("type", out JsonElement typeElement);
+                        attribute.TryGetProperty("enumerationName", out JsonElement enumerationElement);
+                        if (!string.IsNullOrEmpty(nameElement.GetString()) &&
                             !string.IsNullOrEmpty(typeElement.GetString()))
                         {
-                            attributes.Add(new AttributeModel(nameElement.GetString()!, typeElement.GetString()!));
+                            attributes.Add(new AttributeModel(nameElement.GetString()!, typeElement.GetString()!, enumerationElement.GetString()!));
                         }
                         else
                         {
@@ -544,7 +546,7 @@ namespace BYOLLM
                             attribute.TryGetProperty("type", out JsonElement typeElement) &&
                             !string.IsNullOrEmpty(nameElement.GetString()))
                         {
-                            attributes.Add(new AttributeModel(nameElement.GetString()!, string.Empty));
+                            attributes.Add(new AttributeModel(nameElement.GetString()!, string.Empty, String.Empty));
                         }
                         else
                         {

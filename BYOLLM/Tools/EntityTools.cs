@@ -2,6 +2,7 @@
 using BYOLLM.Models;
 using Mendix.StudioPro.ExtensionsAPI.Model;
 using Mendix.StudioPro.ExtensionsAPI.Model.DomainModels;
+using Mendix.StudioPro.ExtensionsAPI.Model.Enumerations;
 using Mendix.StudioPro.ExtensionsAPI.Model.Projects;
 using Mendix.StudioPro.ExtensionsAPI.Services;
 using System;
@@ -70,7 +71,7 @@ namespace BYOLLM
             return $"The associations in entity {entityName} of module {moduleName} are: {response}";
         }
 
-        public string CreateAttribute(IModel currentApp, string moduleName, string entityName, string attributeName, string attributeType)
+        public string CreateAttribute(IModel currentApp, string moduleName, string entityName, string attributeName, string attributeType, string? enumerationName)
         {
             var module = currentApp.Root.GetModules().FirstOrDefault(m => string.Equals(m.Name, moduleName, StringComparison.OrdinalIgnoreCase));
             if (module == null)
@@ -85,10 +86,18 @@ namespace BYOLLM
             using (var transaction = currentApp.StartTransaction("Create new Attribute"))
             {
                 IAttribute newAttribute = currentApp.Create<IAttribute>();
-                var attributeTypeInstance = GetAttributeType(currentApp, attributeType);
+                IAttributeType attributeTypeInstance;
+                if (attributeType == "enumeration")
+                {
+                    attributeTypeInstance = GetEnumerationAttributeType(currentApp, module, enumerationName);
+                }
+                else
+                {
+                   attributeTypeInstance = GetAttributeType(currentApp, attributeType);
+                }
                 if (attributeTypeInstance == null)
                 {
-                    return $"Invalid attribute type: {attributeType}";
+                    return $"Invalid attribute type: {attributeType} or doesn't exist";
                 }
                 newAttribute.Name = attributeName;
                 newAttribute.Type = attributeTypeInstance;
@@ -116,10 +125,18 @@ namespace BYOLLM
                 foreach (var attribute in attributes)
                 {
                     IAttribute newAttribute = currentApp.Create<IAttribute>();
-                    var attributeTypeInstance = GetAttributeType(currentApp, attribute.Type);
+                    IAttributeType attributeTypeInstance;
+                    if (attribute.Type == "enumeration")
+                    {
+                        attributeTypeInstance = GetEnumerationAttributeType(currentApp, module, attribute.EnumerationName);
+                    }
+                    else
+                    {
+                        attributeTypeInstance = GetAttributeType(currentApp, attribute.Type);
+                    }
                     if (attributeTypeInstance == null)
                     {
-                        return $"Invalid attribute type: {attribute.Type}";
+                        return $"Invalid attribute type: {attribute.Type} or doesn't exist";
                     }
                     newAttribute.Name = attribute.Name;
                     newAttribute.Type = attributeTypeInstance;
@@ -221,7 +238,7 @@ namespace BYOLLM
             }
             using (var transaction = currentApp.StartTransaction("Remove attribute"))
             {
-                foreach(var attributeItem in attributes)
+                foreach (var attributeItem in attributes)
                 {
                     var attribute = entity.GetAttributes().FirstOrDefault(a => string.Equals(a.Name, attributeItem.Name, StringComparison.OrdinalIgnoreCase));
                     if (attribute == null)
@@ -272,11 +289,23 @@ namespace BYOLLM
                 "decimal" => currentApp.Create<IDecimalAttributeType>(),
                 "datetime" => currentApp.Create<IDateTimeAttributeType>(),
                 "binary" => currentApp.Create<IBinaryAttributeType>(),
-                "enumeration" => currentApp.Create<IEnumerationAttributeType>(),
+                //"enumeration" => currentApp.Create<IEnumerationAttributeType>(),
                 "autonumber" => currentApp.Create<IAutoNumberAttributeType>(),
                 "hashedstring" => currentApp.Create<IHashedStringAttributeType>(),
                 _ => null
             };
+        }
+
+        private static IAttributeType? GetEnumerationAttributeType(IModel currentApp, IModule module,  string enumerationName)
+        {
+            var attrType = currentApp.Create<IEnumerationAttributeType>();
+            IEnumeration? enumeration = module.GetDocuments().FirstOrDefault(e => e.Name == enumerationName) as IEnumeration;
+            if(enumeration == null)
+            {
+                return null;
+            }
+            attrType.Enumeration = enumeration.QualifiedName;
+            return attrType;
         }
 
         private string GetValidAssociationName(IModel currentApp, IModule originModule, IEntity originEntity, IModule destinationModule, IEntity destinationEntity)
