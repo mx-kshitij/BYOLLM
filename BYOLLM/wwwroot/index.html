@@ -181,11 +181,6 @@
                     <div id="deployment-validation" class="validation-message">Please enter a valid model deployment name</div>
                 </div>
 
-                <!--<div>
-                    <label for="version" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Version</label>
-                    <input type="text" id="version" class="w-full p-2 border rounded text-gray-700 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600">
-                </div>-->
-
                 <div>
                     <label for="apikey" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">API key</label>
                     <input type="text" id="apikey" class="w-full p-2 border rounded text-gray-700 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600" disabled>
@@ -206,6 +201,12 @@
                 <button id="connect-btn" class="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center justify-center">
                     <div id="connect-spinner" class="spinner mr-2 hidden"></div>
                     Connect
+                </button>
+
+                <button id="disconnect-btn"
+                        class="w-full p-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center justify-center hidden">
+                    <div id="disconnect-spinner" class="spinner mr-2 hidden"></div>
+                    Disconnect
                 </button>
             </div>
         </div>

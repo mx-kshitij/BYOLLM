@@ -90,6 +90,10 @@ namespace Odin
                         _msgService.ShowError("Connection Failed : " + ex.Message, ex.StackTrace);
                     }
                 }
+                else if(args.Message == "Disconnect")
+                {
+                    _dockingWindowService.ClosePane("Odin");
+                }
             };
 
         }

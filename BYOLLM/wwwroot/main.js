@@ -94,6 +94,10 @@ function initiateConnection() {
     }
 }
 
+function disconnect() {
+    publishMessage("Disconnect", null);
+}
+
 async function loadConfiguration() {
     let documentsResponse = await fetch(`./getConfiguration`);
     let config = await documentsResponse.json();
@@ -259,14 +263,28 @@ function formatText(text) {
     return text;
 }
 
+function updateConnectionUI() {
+    const disconnectBtn = document.getElementById('disconnect-btn');
+    const connectBtn = document.getElementById('connect-btn');
+    if (isConnected) {
+        connectBtn.classList.add('hidden');
+        disconnectBtn.classList.remove('hidden');
+    } else {
+        connectBtn.classList.remove('hidden');
+        disconnectBtn.classList.add('hidden');
+    }
+}
+
+
 let currentAttachment = null;
+let isConnected = false;
 
 async function init() {
     const themeToggle = document.getElementById('theme-toggle');
     const messageInput = document.getElementById('message-input');
     const sendBtn = document.getElementById('send-btn');
-    const messagesContainer = document.getElementById('messages');
     const connectBtn = document.getElementById('connect-btn');
+    const disconnectBtn = document.getElementById('disconnect-btn');
     const configToggle = document.getElementById('config-toggle');
     const useEntraID = document.getElementById('useEntraID');
     const closeConfig = document.getElementById('close-config');
@@ -319,8 +337,8 @@ async function init() {
 
     useEntraID.addEventListener('change', toggleUseEntraID);
 
-    // Connection Configuration
     connectBtn.addEventListener('click', initiateConnection);
+    disconnectBtn.addEventListener('click', disconnect);
 
     imageUploadInput.addEventListener('change', uploadImageToMessage);
 
@@ -368,7 +386,7 @@ function registerListener() {
 
 function handleMessage(event) {
     const { message, data } = event;
-    console.info("Received message:", message, data);
+    console.debug("Received message:", message, data);
     if (message === "AssistantMessageResponse") {
         addMessage(data, 'bot');
         enableSendButton();
@@ -379,6 +397,8 @@ function handleMessage(event) {
         hideConfigPanel();
         showThinking();
         enableSendButton();
+        isConnected = true;
+        updateConnectionUI();
     }
     else if (message === "ToolResponse") {
         addMessage(data, 'bot');
