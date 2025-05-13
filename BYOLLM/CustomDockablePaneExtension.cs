@@ -1,14 +1,9 @@
 ﻿using Mendix.StudioPro.ExtensionsAPI.Services;
 using Mendix.StudioPro.ExtensionsAPI.UI.DockablePane;
 using Mendix.StudioPro.ExtensionsAPI.UI.Services;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BYOLLM
+namespace Odin
 {
     [Export(typeof(DockablePaneExtension))]
     public class CustomDockablePaneExtension : DockablePaneExtension
@@ -18,7 +13,7 @@ namespace BYOLLM
         private readonly IMessageBoxService _msgService;
         private readonly IDockingWindowService _dockingWindowService;
         private readonly IDomainModelService _domainModelService;
-        public const string PaneId = "StudioAIDev";
+        public const string PaneId = "Odin";
 
         [ImportingConstructor]
         public CustomDockablePaneExtension(ILogService logService, IBackgroundJobService bgService, IMessageBoxService msgService, IDockingWindowService dockingWindowService, IDomainModelService domainModelService)
@@ -34,7 +29,7 @@ namespace BYOLLM
 
         public override DockablePaneViewModelBase Open()
         {
-            return new CustomDockablePaneViewModel(WebServerBaseUrl, () => CurrentApp, _logService, _bgService, _msgService, _dockingWindowService, _domainModelService) { Title = "Studio AI Dev" };
+            return new CustomDockablePaneViewModel(WebServerBaseUrl, () => CurrentApp, _logService, _bgService, _msgService, _dockingWindowService, _domainModelService) { Title = "Odin" };
         }
     }
 }

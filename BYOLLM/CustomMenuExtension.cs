@@ -1,15 +1,10 @@
 ﻿using Mendix.StudioPro.ExtensionsAPI.UI.Menu;
 using Mendix.StudioPro.ExtensionsAPI.UI.Services;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BYOLLM
+namespace Odin
 {
-    [Export(typeof(Mendix.StudioPro.ExtensionsAPI.UI.Menu.MenuExtension))]
+    [Export(typeof(MenuExtension))]
     public class CustomMenuExtension : MenuExtension
     {
         private readonly IDockingWindowService _dockingWindowService;
@@ -22,7 +17,7 @@ namespace BYOLLM
 
         public override IEnumerable<MenuViewModel> GetMenus()
         {
-            yield return new MenuViewModel("Studio AI Dev", () => _dockingWindowService.OpenPane(CustomDockablePaneExtension.PaneId));
+            yield return new MenuViewModel("Odin", () => _dockingWindowService.OpenPane(CustomDockablePaneExtension.PaneId));
         }
     }
 }

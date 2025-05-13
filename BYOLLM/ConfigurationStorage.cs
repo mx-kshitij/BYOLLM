@@ -1,13 +1,9 @@
 ﻿using Mendix.StudioPro.ExtensionsAPI.Model;
 using Mendix.StudioPro.ExtensionsAPI.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
-namespace BYOLLM
+namespace Odin
 {
     public class ConfigurationStorage
     {

@@ -1,21 +1,11 @@
-﻿using Azure;
-using BYOLLM.Models;
-using Mendix.StudioPro.ExtensionsAPI.Model;
+﻿using Mendix.StudioPro.ExtensionsAPI.Model;
 using Mendix.StudioPro.ExtensionsAPI.Model.DomainModels;
 using Mendix.StudioPro.ExtensionsAPI.Model.Enumerations;
 using Mendix.StudioPro.ExtensionsAPI.Model.Projects;
 using Mendix.StudioPro.ExtensionsAPI.Services;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Design;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
-namespace BYOLLM
+namespace Odin
 {
     public class EntityTools
     {

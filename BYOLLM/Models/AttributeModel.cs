@@ -1,14 +1,7 @@
-﻿using Mendix.StudioPro.ExtensionsAPI.Model;
-using Mendix.StudioPro.ExtensionsAPI.Model.DomainModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mail;
-using System.Text;
+﻿using Mendix.StudioPro.ExtensionsAPI.Model.DomainModels;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
-namespace BYOLLM
+namespace Odin
 {
     public record AttributeModel
     {

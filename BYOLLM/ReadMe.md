@@ -1,7 +1,7 @@
-# BYOLLM (Bring Your Own Large Language Model)
+# ODIN
 
 ## Overview
-**BYOLLM** is a custom extension for Mendix Studio Pro that integrates AI-powered chat functionality into the development environment. It provides a dockable pane with a web-based interface for interacting with a chat client, enabling developers to send messages, receive responses, and perform tool-based operations.
+**ODIN** is a custom extension for Mendix Studio Pro that integrates AI-powered chat functionality into the development environment. It provides a dockable pane with a web-based interface for interacting with a chat client, enabling developers to send messages, receive responses, and perform tool-based operations.
 
 The project leverages OpenAI's Chat API for natural language processing and integrates with Mendix's Extensions API to provide seamless interaction with the Mendix modeling environment.
 
@@ -61,4 +61,4 @@ The project leverages OpenAI's Chat API for natural language processing and inte
 ---
 
 ## Conclusion
-The BYOLLM project enhances the Mendix development experience by integrating AI-powered chat and tool functionality. It is designed to be extensible, robust, and user-friendly, making it a valuable addition to the Mendix ecosystem.
+Odin enhances the Mendix development experience by integrating AI-powered chat and tool functionality. It is designed to be extensible, robust, and user-friendly, making it a valuable addition to the Mendix ecosystem.

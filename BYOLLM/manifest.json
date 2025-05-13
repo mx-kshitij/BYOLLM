@@ -1,4 +1,4 @@
 {
-	"mx_extensions": [ "byollm.dll" ],
+	"mx_extensions": [ "odin.dll" ],
 	"mx_build_extensions": []
 }

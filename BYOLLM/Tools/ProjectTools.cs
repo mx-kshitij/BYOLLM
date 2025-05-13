@@ -1,13 +1,7 @@
 ﻿using Mendix.StudioPro.ExtensionsAPI;
-using Mendix.StudioPro.ExtensionsAPI.Model;
 using Mendix.StudioPro.ExtensionsAPI.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BYOLLM.Tools
+namespace Odin
 {
     public class ProjectTools
     {

@@ -1,15 +1,6 @@
-﻿using Azure;
-using Mendix.StudioPro.ExtensionsAPI.Model;
-using Mendix.StudioPro.ExtensionsAPI.Model.Projects;
-using Mendix.StudioPro.ExtensionsAPI.UI.WebView;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Mendix.StudioPro.ExtensionsAPI.UI.WebView;
 
-namespace BYOLLM
+namespace Odin
 {
     public class ChatTools
     {

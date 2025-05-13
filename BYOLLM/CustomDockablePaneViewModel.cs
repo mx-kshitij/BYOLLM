@@ -1,17 +1,13 @@
-﻿using BYOLLM.Tools;
-using Mendix.StudioPro.ExtensionsAPI.Model;
-using Mendix.StudioPro.ExtensionsAPI.Model.Microflows;
+﻿using Mendix.StudioPro.ExtensionsAPI.Model;
 using Mendix.StudioPro.ExtensionsAPI.Services;
 using Mendix.StudioPro.ExtensionsAPI.UI.DockablePane;
 using Mendix.StudioPro.ExtensionsAPI.UI.Services;
 using Mendix.StudioPro.ExtensionsAPI.UI.WebView;
-using Microsoft.SemanticKernel;
 using OpenAI.Chat;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Text.Json;
 
-namespace BYOLLM
+namespace Odin
 {
     public class CustomDockablePaneViewModel : WebViewDockablePaneViewModel
     {

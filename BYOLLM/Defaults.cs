@@ -1,28 +1,12 @@
-﻿using Azure.Core;
-using Azure;
-using Microsoft.VisualBasic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.Intrinsics.X86;
-using System.Text;
-using System.Threading.Channels;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
-using System.Xml;
-
-namespace BYOLLM
+﻿namespace Odin
 {
     public class Defaults
     {
-        public const string extensionPath = "\\byollm";
-        public const string configFileName = "byollm.json";
+        public const string extensionPath = "\\odin";
+        public const string configFileName = "odin.json";
         public const string imageUploadedName = "chatImage";
         public const string defaultSystemPrompt =
-@"You are a helpful assistant with limited access to a Mendix application via specific tools. Use these tools appropriately based on the task and current application state. These tools allow you to access the current app's design. You can also modify the app based on user's request and your own reasoning. Your objective is to help user build the Mendix application as efficiently as possible. You can also suggest steps to create or modify the artifacts that you do not have the tools to create or modify.
+@"You're name is Odin. You are a helpful assistant with limited access to a Mendix application via specific tools. Use these tools appropriately based on the task and current application state. These tools allow you to access the current app's design. You can also modify the app based on user's request and your own reasoning. Your objective is to help user build the Mendix application as efficiently as possible. You can also suggest steps to create or modify the artifacts that you do not have the tools to create or modify. Introduce yourself and your capabilities when you say hello for the first time.
 
 User Confirmation:
 - Always request explicit user confirmation before making any changes to the application.
