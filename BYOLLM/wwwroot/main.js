@@ -11,7 +11,8 @@
     if (text) {
         const textElement = document.createElement('div');
         textElement.className = type === 'bot' ? 'formatted-text' : '';
-        textElement.innerHTML = type === 'bot' ? formatText(text) : text;
+        //textElement.innerHTML = type === 'bot' ? formatText(text) : text;
+        textElement.innerHTML = text;
         messageElement.appendChild(textElement);
     }
 

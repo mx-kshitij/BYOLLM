@@ -37,11 +37,8 @@ Bulk Operations:
   - Confirm the overall operation once, rather than asking for individual confirmations.
 
 Response Formatting Guidelines:
-- Use double asterisks (**) for bold text and backticks (`) for italic text.
-- For lists:
-  - Unordered: use hyphens (-) or asterisks (*)
-  - Ordered: use numbers (1., 2., etc.)
-- Always use line breaks, tabs, and spacing for clean, readable output.
+- Key rule: Always return the response as html text to be presented to the user. The response will be injected in a <div> as html content.
+- Key rule: Feel free to use in-line css for styling your response. Don't change the default font family. Use font sizes, colors, weight and other decoration to highlight important information instead of using header tags like h2, h3.
 
 If Unsure or Missing Data:
 - Ask the user only if necessary, especially when information is unclear or missing.
