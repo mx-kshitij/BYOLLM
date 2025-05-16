@@ -4,7 +4,6 @@ using Mendix.StudioPro.ExtensionsAPI.UI.DockablePane;
 using Mendix.StudioPro.ExtensionsAPI.UI.Services;
 using Mendix.StudioPro.ExtensionsAPI.UI.WebView;
 using OpenAI.Chat;
-using System.Drawing;
 using System.Text.Json;
 
 namespace Odin
@@ -107,7 +106,6 @@ namespace Odin
 
         public ChatCompletion AddUserMessage(MessageModel userMessage)
         {
-            Image image = null;
             string imagePath = "", imageMime = "";
             if (userMessage.Attachment == null)
             {
@@ -152,7 +150,14 @@ namespace Odin
                     foreach (ChatToolCall toolCall in chatCompletion.ToolCalls)
                     {
                         string toolResponse = "";
-                        int toolOutput = toolsHandler.HandleTool(toolCall, ref toolResponse);
+                        try
+                        {
+                            int toolOutput = toolsHandler.HandleTool(toolCall, ref toolResponse);
+                        }
+                        catch (Exception e)
+                        {
+                                toolResponse = $"An error occured in the tool call {toolCall.Id} : {e.Message}";
+                        }
                         conversationHistory.Add(new ToolChatMessage(toolCall.Id, toolResponse));
                     }
                     chatCompletion = chatClient.CompleteChat(conversationHistory, options);

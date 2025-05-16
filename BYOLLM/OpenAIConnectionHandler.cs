@@ -22,13 +22,19 @@ namespace Odin
             AzureOpenAIClient openAIClient;
             if (config.UseEntraId)
             {
-                openAIClient = new AzureOpenAIClient(new Uri(config.Endpoint), new DefaultAzureCredential());
+                if (OperatingSystem.IsMacOS())
+                {
+                    openAIClient = new AzureOpenAIClient(new Uri(config.Endpoint), new DefaultAzureCredential(includeInteractiveCredentials: true));
+                }
+                else
+                {
+                    openAIClient = new AzureOpenAIClient(new Uri(config.Endpoint), new DefaultAzureCredential());
+                }
             }
             else
             {
                 openAIClient = new AzureOpenAIClient(new Uri(config.Endpoint), new AzureKeyCredential(config.Apikey));
             }
-
 
             ChatClient chatClient = openAIClient.GetChatClient(config.Deployment);
 

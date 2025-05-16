@@ -1,5 +1,6 @@
-﻿using System.Drawing;
-using System.Drawing.Imaging;
+﻿using FileSignatures;
+using Microsoft.AspNetCore.StaticFiles;
+//using MimeDetective;
 
 namespace Odin
 {
@@ -14,19 +15,16 @@ namespace Odin
                     int commaIndex = base64String.IndexOf(',');
                     base64String = base64String.Substring(commaIndex + 1);
                     byte[] imageBytes = Convert.FromBase64String(base64String);
-                    using (MemoryStream ms = new MemoryStream(imageBytes))
-                    {
-                        Image image = Image.FromStream(ms, true);
-                        string mime = ImageCodecInfo.GetImageEncoders().First(codec => codec.FormatID == image.RawFormat.Guid).MimeType;
-                        image.Save($"{path}");
-                        return mime;
-                    }
+                    File.WriteAllBytes(path, imageBytes);
+                    //var contentType = new FileExtensionContentTypeProvider().TryGetContentType(path, out var type) ? type : "image/png";
+                    var inspector = new FileFormatInspector();
+                    var format = inspector.DetermineFileFormat(new MemoryStream(imageBytes));
+                    return format.ToString();
                 }
                 else
                 {
                     return null;
                 }
-
             }
             catch (Exception ex)
             {
