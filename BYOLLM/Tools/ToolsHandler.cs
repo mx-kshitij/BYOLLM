@@ -254,18 +254,25 @@ namespace Odin
                    locationXElement.ValueKind == JsonValueKind.Number && int.IsPositive(locationXElement.GetInt32()) &&
                    locationYElement.ValueKind == JsonValueKind.Number && int.IsPositive(locationYElement.GetInt32()))
                 {
+                    // Set default to false if value is empty or undefined
+                    bool isPersistent = isPersistentElement.ValueKind == JsonValueKind.True ? true : isPersistentElement.ValueKind == JsonValueKind.False ? false : false;
+                    bool hasChangedDate = hasChangedDateElement.ValueKind == JsonValueKind.True ? true : hasChangedDateElement.ValueKind == JsonValueKind.False ? false : false;
+                    bool hasCreatedDate = hasCreatedDateElement.ValueKind == JsonValueKind.True ? true : hasCreatedDateElement.ValueKind == JsonValueKind.False ? false : false;
+                    bool hasOwner = hasOwnerElement.ValueKind == JsonValueKind.True ? true :  hasOwnerElement.ValueKind == JsonValueKind.False ? false : false;
+                    bool hasChangedBy = hasChangedByElement.ValueKind == JsonValueKind.True ? true : hasChangedByElement.ValueKind == JsonValueKind.False ? false : false;
+
                     response = ModelTools.CreateEntity(
                         currentApp,
                         moduleElement.GetString()!,
                         new EntityModel(
                             entityElement.GetString()!,
                             new Location(locationXElement.GetInt32()!, locationYElement.GetInt32()!),
-                            documentationElement.GetString()!,
-                            isPersistentElement.GetBoolean()!,
-                            hasChangedDateElement.GetBoolean()!,
-                            hasCreatedDateElement.GetBoolean()!,
-                            hasOwnerElement.GetBoolean()!,
-                            hasChangedByElement.GetBoolean()!));
+                            documentationElement.GetString() ?? "",
+                            isPersistent,
+                            hasChangedDate,
+                            hasCreatedDate,
+                            hasOwner,
+                            hasChangedBy));
                     return 1;
                 }
                 response = "Invalid or missing 'module', 'entity' or 'other entity' argument.";

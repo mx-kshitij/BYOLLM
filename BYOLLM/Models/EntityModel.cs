@@ -6,7 +6,15 @@ namespace Odin
     public record EntityModel
     {
         [JsonConstructor]
-        public EntityModel( string name, Location location, string documentation = "", bool isPersistent = true, bool hasChangedDate = false, bool hasCreatedDate = false, bool hasOwner = false, bool hasChangedBy = false)
+        public EntityModel(
+            string name,
+            Location location,
+            string documentation = "",
+            bool isPersistent = true,
+            bool hasChangedDate = false,
+            bool hasCreatedDate = false,
+            bool hasOwner = false,
+            bool hasChangedBy = false)
         {
             Name = name;
             Location = location;

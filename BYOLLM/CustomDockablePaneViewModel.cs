@@ -152,6 +152,7 @@ namespace Odin
                         string toolResponse = "";
                         try
                         {
+                            webView.PostMessage("ThinkingMessageUpdate", UpdateToolMessageForUI(toolCall));
                             int toolOutput = toolsHandler.HandleTool(toolCall, ref toolResponse);
                         }
                         catch (Exception e)
@@ -168,6 +169,29 @@ namespace Odin
             {
                 _msgService.ShowError("Connection Failed : " + ex.Message, ex.StackTrace);
                 webView.PostMessage("Error", ex.Message);
+            }
+        }
+
+        public string UpdateToolMessageForUI(ChatToolCall tool)
+        {
+            if(tool == null)
+            {
+                return "";
+            }
+            if(tool.FunctionName.Contains("get", StringComparison.OrdinalIgnoreCase)){
+                return $"Fetching data from your app...";
+            }
+            else if (tool.FunctionName.Contains("create", StringComparison.OrdinalIgnoreCase) || tool.FunctionName.Contains("add", StringComparison.OrdinalIgnoreCase))
+            {
+                return $"Creating artifacts in your app...";
+            }
+            else if (tool.FunctionName.Contains("update", StringComparison.OrdinalIgnoreCase))
+            {
+                return $"Updating artifacts in your app...";
+            }
+            else
+            {
+                return $"Doing something...";
             }
         }
     }

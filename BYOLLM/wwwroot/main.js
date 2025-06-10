@@ -140,14 +140,21 @@ function removeClassFromMessageContainer(classname) {
 
 function showThinking() {
     const thinkingIndicator = document.getElementById('thinking-indicator');
+    thinkingIndicator.textContent = 'Thinking...';
     thinkingIndicator.classList.remove('hidden');
     applyClassToMessageContainer('thinking');
 }
 
 function hideThinking() {
     const thinkingIndicator = document.getElementById('thinking-indicator');
+    thinkingIndicator.textContent = 'Thinking...';
     thinkingIndicator.classList.add('hidden');
     removeClassFromMessageContainer('thinking');
+}
+
+function updateThinkingMessage(text) {
+    const thinkingIndicator = document.getElementById('thinking-indicator');
+    thinkingIndicator.textContent = text || 'Thinking...';
 }
 
 function clearImageAttachment() {
@@ -413,6 +420,10 @@ function handleMessage(event) {
         hideThinking();
         enableSendButton();
         hideConnectingSpinner();
+    }
+    else if (message === "ThinkingMessageUpdate") {
+        showThinking();
+        updateThinkingMessage(data);
     }
 }
 

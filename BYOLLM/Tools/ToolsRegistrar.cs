@@ -231,7 +231,7 @@ namespace Odin
                            ""description"": ""Whether the system attribute changedBy should be enabled. It tracks the user who last changed the record without need of user programming.""
                        }
                        },
-                       ""required"": [""module"", ""entity"",""locationX"",""locationY""]
+                       ""required"": [""module"", ""entity"",""locationX"",""locationY"", ""isPersistent"", ""documentation"", ""hasChangedDate"", ""hasCreatedDate"", ""hasOwner"", ""hasChangedBy""]
                    }  
                ")
              );

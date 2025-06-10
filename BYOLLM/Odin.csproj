@@ -14,6 +14,7 @@
     <PackageReference Include="Mendix.StudioPro.ExtensionsAPI" Version="10.21.1" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.48.0" />
+    <PackageReference Include="OllamaSharp" Version="5.2.2" />
   </ItemGroup>
 
   <ItemGroup>
